@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Floating Notes</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+
+    <!-- Traffic light buttons -->
+    <div class="traffic-lights">
+      <button id="closeBtn" class="traffic-light close" title="Close"></button>
+      <button id="minimizeBtn" class="traffic-light minimize" title="Minimize"></button>
+      <button id="maximizeBtn" class="traffic-light maximize" title="Expand/Compact"></button>
+    </div>
+
+    <div class="header">
+      <div class="title-section">
+        <input type="text" id="noteTitle" class="note-title" placeholder="Note title">
+        <button id="allNotesBtn" class="icon-btn" title="All Notes">≡</button>
+        <button id="newNoteBtn" class="icon-btn" title="New Note (⌘N)">+</button>
+        <button id="deleteNoteBtn" class="icon-btn danger" title="Delete Note">−</button>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <button id="boldBtn" class="format-btn" title="Bold (⌘B)"><strong>B</strong></button>
+      <button id="italicBtn" class="format-btn" title="Italic (⌘I)"><em>I</em></button>
+      <button id="underlineBtn" class="format-btn" title="Underline (⌘U)"><u>U</u></button>
+      <div class="separator"></div>
+      <button id="bulletBtn" class="format-btn" title="Bullet Point">•</button>
+      <button id="todoBtn" class="format-btn" title="To-Do Item">☐</button>
+      <div class="separator"></div>
+      <button id="linkBtn" class="format-btn" title="Add Link">🔗</button>
+    </div>
+
+    <!-- Inline link dialog (replaces broken prompt()) -->
+    <div id="linkDialog" class="link-dialog" style="display:none;">
+      <div class="link-dialog-row">
+        <label class="link-label">Text</label>
+        <input type="text" id="linkTextInput" class="link-input" placeholder="Link text">
+      </div>
+      <div class="link-dialog-row">
+        <label class="link-label">URL</label>
+        <input type="text" id="linkUrlInput" class="link-input" placeholder="https://...">
+      </div>
+      <div class="link-dialog-actions">
+        <button id="linkCancelBtn" class="link-action-btn">Cancel</button>
+        <button id="linkInsertBtn" class="link-action-btn primary">Insert</button>
+      </div>
+    </div>
+
+    <div class="editor-wrapper">
+      <div id="editor" class="editor" contenteditable="true" data-placeholder="Start typing… (⌘← ⌘→ to navigate notes)"></div>
+    </div>
+
+    <div class="metadata">
+      <span id="timestamps" class="timestamp"></span>
+    </div>
+
+    <div class="footer">
+      <button id="shortcutsBtn" class="hamburger-btn" title="Keyboard Shortcuts">⌘</button>
+      <button id="transferBtn" class="action-btn">Transfer to Apple Notes</button>
+      <button id="copyBtn" class="action-btn primary">Copy <kbd>⌘⏎</kbd></button>
+    </div>
+
+    <!-- All Notes panel -->
+    <div id="allNotesPanel" class="shortcuts-panel" style="display:none;">
+      <div class="shortcuts-header">
+        <span>All Notes</span>
+        <button id="allNotesCloseBtn" class="shortcuts-close">✕</button>
+      </div>
+      <div id="allNotesList" class="shortcuts-list">
+        <!-- dynamically populated -->
+      </div>
+      <div class="all-notes-footer">
+        <button id="deleteAllNotesBtn" class="danger-btn">Delete All Notes</button>
+      </div>
+    </div>
+
+    <!-- Shortcuts panel -->
+    <div id="shortcutsPanel" class="shortcuts-panel" style="display:none;">
+      <div class="shortcuts-header">
+        <span>Keyboard Shortcuts</span>
+        <button id="shortcutsCloseBtn" class="shortcuts-close">✕</button>
+      </div>
+      <div class="shortcuts-list">
+        <div class="shortcut-row"><kbd>⌘B</kbd><span>Bold</span></div>
+        <div class="shortcut-row"><kbd>⌘I</kbd><span>Italic</span></div>
+        <div class="shortcut-row"><kbd>⌘U</kbd><span>Underline</span></div>
+        <div class="shortcut-row"><kbd>⌘N</kbd><span>New note</span></div>
+        <div class="shortcut-row"><kbd>⌘⌫</kbd><span>Delete note</span></div>
+        <div class="shortcut-row"><kbd>⌘⇧⌫</kbd><span>Delete all notes</span></div>
+        <div class="shortcut-row"><kbd>⌘⏎</kbd><span>Copy to clipboard</span></div>
+        <div class="shortcut-row"><kbd>⌘←</kbd><span>Previous note</span></div>
+        <div class="shortcut-row"><kbd>⌘→</kbd><span>Next note</span></div>
+        <div class="shortcut-row"><kbd>-</kbd> + <kbd>Space</kbd><span>Bullet point</span></div>
+        <div class="shortcut-row"><kbd>[]</kbd> + <kbd>Space</kbd><span>To-do item</span></div>
+        <div class="shortcut-row"><kbd>⌥⌘N</kbd><span>Toggle window</span></div>
+      </div>
+    </div>
+
+    <div id="notification"></div>
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>

@@ -1,0 +1,56 @@
+{
+  "name": "floatnote",
+  "version": "1.0.0",
+  "description": "Always-on-top floating notes app for macOS",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron .",
+    "build": "electron-builder build --mac",
+    "launch": "npm run build && open dist/mac-arm64/FloatNote.app",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "build": {
+    "appId": "com.floatnote.app",
+    "productName": "FloatNote",
+    "directories": {
+      "buildResources": "resources",
+      "output": "dist"
+    },
+    "mac": {
+      "category": "public.app-category.productivity",
+      "icon": "resources/icon.png",
+      "target": [
+        {
+          "target": "dir"
+        }
+      ]
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "renderer.js",
+      "index.html",
+      "styles.css",
+      "node_modules/**/*"
+    ],
+    "asarUnpack": [
+      "**/node_modules/better-sqlite3/**/*",
+      "**/node_modules/electron-liquid-glass/**/*"
+    ]
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.6.2",
+    "electron-liquid-glass": "^1.1.1",
+    "marked": "^17.0.3"
+  },
+  "devDependencies": {
+    "@electron/rebuild": "^4.0.3",
+    "electron": "^40.6.1",
+    "electron-builder": "^25.1.8"
+  }
+}
