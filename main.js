@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, globalShortcut, clipboard, Tray, nativeImage } = require('electron');
+const { app, BrowserWindow, ipcMain, globalShortcut, clipboard, Tray, nativeImage, Menu } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const Database = require('better-sqlite3');
@@ -13,6 +13,32 @@ try {
 } catch (e) {
   console.log('electron-liquid-glass not available, falling back to vibrancy:', e.message);
 }
+
+// ── Settings ──────────────────────────────────────────────
+const SETTINGS_PATH = path.join(os.homedir(), '.floating-notes', 'settings.json');
+
+const DEFAULT_SETTINGS = {
+  showInDock:    false,
+  alwaysOnTop:   true,
+  launchAtLogin: false,
+  fontSize:      'medium',  // 'small' | 'medium' | 'large'
+  theme:         'system'   // 'system' | 'light' | 'dark'
+};
+
+function loadSettings() {
+  try {
+    const raw = fs.readFileSync(SETTINGS_PATH, 'utf8');
+    return { ...DEFAULT_SETTINGS, ...JSON.parse(raw) };
+  } catch (e) {
+    return { ...DEFAULT_SETTINGS };
+  }
+}
+
+function saveSettings(settings) {
+  fs.writeFileSync(SETTINGS_PATH, JSON.stringify(settings, null, 2), 'utf8');
+}
+
+let appSettings = loadSettings();
 
 // Initialize database
 const dbPath = path.join(os.homedir(), '.floating-notes', 'notes.db');
@@ -73,7 +99,7 @@ function createWindow() {
   mainWindow.once('ready-to-show', () => {
     // 'status' level — above floating, participates fully in the macOS
     // compositor chain, allowing live backdrop sampling for glass/vibrancy
-    mainWindow.setAlwaysOnTop(true, 'status');
+    if (appSettings.alwaysOnTop) mainWindow.setAlwaysOnTop(true, 'status');
     mainWindow.show();
     windowVisible = true;
     // Apply native Liquid Glass (NSGlassEffectView) if available
@@ -128,8 +154,13 @@ function toggleWindow() {
 app.on('window-all-closed', (e) => e.preventDefault());
 
 app.on('ready', () => {
-  // Move to Menu Bar — hide from Dock
-  app.dock.hide();
+  // Apply dock setting from persisted preferences
+  if (appSettings.showInDock) {
+    app.dock.show();
+  } else {
+    app.dock.hide();
+  }
+  app.setLoginItemSettings({ openAtLogin: appSettings.launchAtLogin });
 
   createWindow();
 
@@ -140,6 +171,24 @@ app.on('ready', () => {
   tray = new Tray(trayIcon);
   tray.setToolTip('FloatNote');
   tray.on('click', () => toggleWindow());
+  tray.on('right-click', () => {
+    const contextMenu = Menu.buildFromTemplate([
+      {
+        label: 'Settings',
+        click: () => {
+          if (!windowVisible && mainWindow) {
+            mainWindow.show();
+            mainWindow.focus();
+            windowVisible = true;
+          }
+          mainWindow.webContents.send('open-settings-panel');
+        }
+      },
+      { type: 'separator' },
+      { label: 'Quit FloatNotes', click: () => app.quit() }
+    ]);
+    tray.popUpContextMenu(contextMenu);
+  });
 
   // Register global hotkey: Option+Command+N
   const ret = globalShortcut.register('Option+Cmd+n', () => {
@@ -165,11 +214,12 @@ app.on('ready', () => {
     currentNoteId = firstNote.id;
   }
 
-  // Send initial note data to renderer
+  // Send initial note data and settings to renderer
   mainWindow.webContents.on('did-finish-load', () => {
     const notes = db.prepare('SELECT id, title FROM notes ORDER BY createdAt ASC').all();
     const currentNote = db.prepare('SELECT * FROM notes WHERE id = ?').get(currentNoteId);
     mainWindow.webContents.send('load-notes', { notes, currentNote });
+    mainWindow.webContents.send('load-settings', appSettings);
   });
 });
 
@@ -302,11 +352,40 @@ ipcMain.on('resize-window', (event, { width, height }) => {
   }
 });
 
+ipcMain.on('get-settings', (event) => {
+  event.reply('settings-data', appSettings);
+});
+
+ipcMain.on('save-settings', (event, partial) => {
+  appSettings = { ...appSettings, ...partial };
+  saveSettings(appSettings);
+
+  if ('showInDock' in partial) {
+    if (appSettings.showInDock) app.dock.show();
+    else app.dock.hide();
+  }
+  if ('alwaysOnTop' in partial) {
+    if (mainWindow) {
+      if (appSettings.alwaysOnTop) mainWindow.setAlwaysOnTop(true, 'status');
+      else mainWindow.setAlwaysOnTop(false);
+    }
+  }
+  if ('launchAtLogin' in partial) {
+    app.setLoginItemSettings({ openAtLogin: appSettings.launchAtLogin });
+  }
+
+  event.reply('settings-data', appSettings);
+});
+
 ipcMain.on('resize-window-height', (event, height) => {
   if (mainWindow) {
     const [currentWidth] = mainWindow.getSize();
     mainWindow.setSize(currentWidth, Math.round(height));
   }
+});
+
+ipcMain.on('quit-app', () => {
+  app.quit();
 });
 
 ipcMain.on('save-note-title', (event, { noteId, title }) => {

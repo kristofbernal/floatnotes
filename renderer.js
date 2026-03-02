@@ -37,7 +37,14 @@ const allNotesCloseBtn  = document.getElementById('allNotesCloseBtn');
 const allNotesList      = document.getElementById('allNotesList');
 const deleteAllNotesBtn = document.getElementById('deleteAllNotesBtn');
 
+// Settings panel
+const settingsBtn       = document.getElementById('settingsBtn');
+const settingsPanel     = document.getElementById('settingsPanel');
+const settingsCloseBtn  = document.getElementById('settingsCloseBtn');
+const quitAppBtn        = document.getElementById('quitAppBtn');
+
 let currentNote = null;
+let currentSettings = {};
 let notes = [];
 let autoSaveTimeout;
 let titleSaveTimeout;
@@ -76,6 +83,21 @@ function initialize() {
 
   window.electronAPI.onTransferError((error) => {
     showNotification('Error: ' + error, true);
+  });
+
+  window.electronAPI.onSettingsLoaded((settings) => {
+    renderSettings(settings);
+    applySettingsToDOM(settings);
+  });
+
+  window.electronAPI.onSettingsData((settings) => {
+    renderSettings(settings);
+    applySettingsToDOM(settings);
+  });
+
+  window.electronAPI.onOpenSettingsPanel(() => {
+    closeAllPanels();
+    settingsPanel.style.display = 'flex';
   });
 }
 
@@ -209,12 +231,44 @@ function renderAllNotesList() {
   });
 }
 
+function closeAllPanels() {
+  allNotesPanel.style.display  = 'none';
+  shortcutsPanel.style.display = 'none';
+  settingsPanel.style.display  = 'none';
+}
+
+function applySettingsToDOM(settings) {
+  const sizeMap = { small: '11px', medium: '13px', large: '15px' };
+  document.documentElement.style.setProperty(
+    '--editor-font-size',
+    sizeMap[settings.fontSize] || sizeMap.medium
+  );
+  if (settings.theme === 'system') {
+    document.documentElement.removeAttribute('data-theme');
+  } else {
+    document.documentElement.setAttribute('data-theme', settings.theme);
+  }
+}
+
+function renderSettings(settings) {
+  currentSettings = settings;
+  ['showInDock', 'alwaysOnTop', 'launchAtLogin'].forEach(key => {
+    const btn = document.getElementById('setting-' + key);
+    if (btn) btn.setAttribute('aria-checked', String(!!settings[key]));
+  });
+  ['fontSize', 'theme'].forEach(key => {
+    const container = document.getElementById('setting-' + key);
+    if (!container) return;
+    container.querySelectorAll('.seg-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.value === settings[key]);
+    });
+  });
+}
+
 allNotesBtn.addEventListener('click', () => {
   const isOpen = allNotesPanel.style.display !== 'none';
-  shortcutsPanel.style.display = 'none';
-  if (isOpen) {
-    allNotesPanel.style.display = 'none';
-  } else {
+  closeAllPanels();
+  if (!isOpen) {
     renderAllNotesList();
     allNotesPanel.style.display = 'flex';
   }
@@ -307,11 +361,49 @@ linkTextInput.addEventListener('keydown', (e) => {
 // ─────────────────────────────────────────────────────────
 shortcutsBtn.addEventListener('click', () => {
   const isOpen = shortcutsPanel.style.display !== 'none';
-  allNotesPanel.style.display = 'none';
-  shortcutsPanel.style.display = isOpen ? 'none' : 'flex';
+  closeAllPanels();
+  if (!isOpen) shortcutsPanel.style.display = 'flex';
 });
 shortcutsCloseBtn.addEventListener('click', () => {
   shortcutsPanel.style.display = 'none';
+});
+
+settingsBtn.addEventListener('click', () => {
+  const isOpen = settingsPanel.style.display !== 'none';
+  closeAllPanels();
+  if (!isOpen) settingsPanel.style.display = 'flex';
+});
+settingsCloseBtn.addEventListener('click', () => {
+  settingsPanel.style.display = 'none';
+});
+
+quitAppBtn.addEventListener('click', () => {
+  window.electronAPI.quitApp();
+});
+
+settingsPanel.addEventListener('click', (e) => {
+  const toggle = e.target.closest('.toggle-switch');
+  if (toggle) {
+    const key = toggle.dataset.setting;
+    const newVal = toggle.getAttribute('aria-checked') !== 'true';
+    const partial = { [key]: newVal };
+    window.electronAPI.saveSettings(partial);
+    currentSettings = { ...currentSettings, ...partial };
+    renderSettings(currentSettings);
+    applySettingsToDOM(currentSettings);
+    return;
+  }
+  const segBtn = e.target.closest('.seg-btn');
+  if (segBtn) {
+    const container = segBtn.closest('.setting-segmented');
+    const key = container.dataset.setting;
+    const newVal = segBtn.dataset.value;
+    const partial = { [key]: newVal };
+    window.electronAPI.saveSettings(partial);
+    currentSettings = { ...currentSettings, ...partial };
+    renderSettings(currentSettings);
+    applySettingsToDOM(currentSettings);
+  }
 });
 
 // ─────────────────────────────────────────────────────────

@@ -24,5 +24,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
   onClipboardCopied: (callback) => ipcRenderer.on('clipboard-copied', () => callback()),
   onNoteTransferred: (callback) => ipcRenderer.on('note-transferred', () => callback()),
   onTransferError: (callback) => ipcRenderer.on('transfer-error', (event, error) => callback(error)),
-  onAllNotesDeleted: (callback) => ipcRenderer.on('all-notes-deleted', () => callback())
+  onAllNotesDeleted: (callback) => ipcRenderer.on('all-notes-deleted', () => callback()),
+
+  getSettings:         () => ipcRenderer.send('get-settings'),
+  saveSettings:        (partial) => ipcRenderer.send('save-settings', partial),
+  onSettingsLoaded:    (cb) => ipcRenderer.on('load-settings', (_, data) => cb(data)),
+  onSettingsData:      (cb) => ipcRenderer.on('settings-data', (_, data) => cb(data)),
+  onOpenSettingsPanel: (cb) => ipcRenderer.on('open-settings-panel', () => cb()),
+  quitApp:             () => ipcRenderer.send('quit-app')
 });
