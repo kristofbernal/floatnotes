@@ -62,6 +62,7 @@
 
     <div class="footer">
       <button id="shortcutsBtn" class="hamburger-btn" title="Keyboard Shortcuts">⌘</button>
+      <button id="settingsBtn" class="hamburger-btn" title="Settings">⚙</button>
       <button id="transferBtn" class="action-btn">Transfer to Apple Notes</button>
       <button id="copyBtn" class="action-btn primary">Copy <kbd>⌘⏎</kbd></button>
     </div>
@@ -77,6 +78,48 @@
       </div>
       <div class="all-notes-footer">
         <button id="deleteAllNotesBtn" class="danger-btn">Delete All Notes</button>
+      </div>
+    </div>
+
+    <!-- Settings panel -->
+    <div id="settingsPanel" class="shortcuts-panel" style="display:none;">
+      <div class="shortcuts-header">
+        <span>Settings</span>
+        <button id="settingsCloseBtn" class="shortcuts-close">✕</button>
+      </div>
+      <div class="settings-list">
+        <div class="setting-row">
+          <span class="setting-label">Show in Dock</span>
+          <button class="toggle-switch" id="setting-showInDock" data-setting="showInDock" role="switch" aria-checked="false"><span class="toggle-knob"></span></button>
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">Always on Top</span>
+          <button class="toggle-switch" id="setting-alwaysOnTop" data-setting="alwaysOnTop" role="switch" aria-checked="true"><span class="toggle-knob"></span></button>
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">Launch at Login</span>
+          <button class="toggle-switch" id="setting-launchAtLogin" data-setting="launchAtLogin" role="switch" aria-checked="false"><span class="toggle-knob"></span></button>
+        </div>
+        <div class="settings-divider"></div>
+        <div class="setting-row">
+          <span class="setting-label">Font Size</span>
+          <div class="setting-segmented" id="setting-fontSize" data-setting="fontSize">
+            <button class="seg-btn" data-value="small">S</button>
+            <button class="seg-btn active" data-value="medium">M</button>
+            <button class="seg-btn" data-value="large">L</button>
+          </div>
+        </div>
+        <div class="setting-row">
+          <span class="setting-label">Theme</span>
+          <div class="setting-segmented" id="setting-theme" data-setting="theme">
+            <button class="seg-btn active" data-value="system">Auto</button>
+            <button class="seg-btn" data-value="light">Light</button>
+            <button class="seg-btn" data-value="dark">Dark</button>
+          </div>
+        </div>
+      </div>
+      <div class="all-notes-footer">
+        <button id="quitAppBtn" class="danger-btn">Quit FloatNotes</button>
       </div>
     </div>
 
