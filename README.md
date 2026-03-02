@@ -28,12 +28,15 @@ npm install
 
 ## Running the App
 
-Start the app:
+Build and launch the app bundle:
 ```bash
-npm start
+npm run build
+open dist/mac-arm64/FloatNote.app
 ```
 
-The app will open with a floating window. Notes are stored in `~/.floating-notes/notes.db`.
+The app will appear in your menu bar. Notes are stored in `~/.floating-notes/notes.db`.
+
+> **Note:** `npm start` runs the app in dev mode via the generic `Electron.app`. Always use `npm run build` to run the real `FloatNote.app` bundle.
 
 ## Keyboard Shortcuts
 
