@@ -85,10 +85,9 @@ The app consists of:
 
 ## Known Limitations
 
-- Markdown is displayed as raw text (e.g., you'll see `**bold**` rather than bold text)
 - Very long notes (>100k characters) may impact performance
 - Transfer to Apple Notes requires Apple Notes to be installed
-- Window position is not persisted between sessions
+- Liquid Glass doesn't update dynamically when you use other apps
 
 ## Future Enhancements
 
