@@ -19,21 +19,21 @@
     <div class="header">
       <div class="title-section">
         <input type="text" id="noteTitle" class="note-title" placeholder="Note title">
-        <button id="allNotesBtn" class="icon-btn" title="All Notes">≡</button>
-        <button id="newNoteBtn" class="icon-btn" title="New Note (⌘N)">+</button>
-        <button id="deleteNoteBtn" class="icon-btn danger" title="Delete Note">−</button>
+        <button id="allNotesBtn" class="icon-btn" title="All Notes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+        <button id="newNoteBtn" class="icon-btn" title="New Note (⌘N)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+        <button id="deleteNoteBtn" class="icon-btn danger" title="Delete Note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>
       </div>
     </div>
 
     <div class="toolbar">
-      <button id="boldBtn" class="format-btn" title="Bold (⌘B)"><strong>B</strong></button>
-      <button id="italicBtn" class="format-btn" title="Italic (⌘I)"><em>I</em></button>
-      <button id="underlineBtn" class="format-btn" title="Underline (⌘U)"><u>U</u></button>
+      <button id="boldBtn" class="format-btn" title="Bold (⌘B)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/><path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/></svg></button>
+      <button id="italicBtn" class="format-btn" title="Italic (⌘I)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="19" y1="4" x2="10" y2="4"/><line x1="14" y1="20" x2="5" y2="20"/><line x1="15" y1="4" x2="9" y2="20"/></svg></button>
+      <button id="underlineBtn" class="format-btn" title="Underline (⌘U)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3v7a6 6 0 0 0 6 6 6 6 0 0 0 6-6V3"/><line x1="4" y1="21" x2="20" y2="21"/></svg></button>
       <div class="separator"></div>
-      <button id="bulletBtn" class="format-btn" title="Bullet Point">•</button>
-      <button id="todoBtn" class="format-btn" title="To-Do Item">☐</button>
+      <button id="bulletBtn" class="format-btn" title="Bullet Point"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="9" y1="6" x2="20" y2="6"/><line x1="9" y1="12" x2="20" y2="12"/><line x1="9" y1="18" x2="20" y2="18"/><circle cx="4" cy="6" r="1.5" fill="currentColor" stroke="none"/><circle cx="4" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="4" cy="18" r="1.5" fill="currentColor" stroke="none"/></svg></button>
+      <button id="todoBtn" class="format-btn" title="To-Do Item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></button>
       <div class="separator"></div>
-      <button id="linkBtn" class="format-btn" title="Add Link">🔗</button>
+      <button id="linkBtn" class="format-btn" title="Add Link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></button>
     </div>
 
     <!-- Inline link dialog (replaces broken prompt()) -->
@@ -61,8 +61,8 @@
     </div>
 
     <div class="footer">
-      <button id="shortcutsBtn" class="hamburger-btn" title="Keyboard Shortcuts">⌘</button>
-      <button id="settingsBtn" class="hamburger-btn" title="Settings">⚙</button>
+      <button id="shortcutsBtn" class="hamburger-btn" title="Keyboard Shortcuts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><line x1="6" y1="10" x2="6.01" y2="10" stroke-width="3"/><line x1="10" y1="10" x2="10.01" y2="10" stroke-width="3"/><line x1="14" y1="10" x2="14.01" y2="10" stroke-width="3"/><line x1="18" y1="10" x2="18.01" y2="10" stroke-width="3"/><line x1="8" y1="14" x2="16" y2="14"/></svg></button>
+      <button id="settingsBtn" class="hamburger-btn" title="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
       <button id="transferBtn" class="action-btn">Transfer to Apple Notes</button>
       <button id="copyBtn" class="action-btn primary">Copy <kbd>⌘⏎</kbd></button>
     </div>
@@ -71,7 +71,7 @@
     <div id="allNotesPanel" class="shortcuts-panel" style="display:none;">
       <div class="shortcuts-header">
         <span>All Notes</span>
-        <button id="allNotesCloseBtn" class="shortcuts-close">✕</button>
+        <button id="allNotesCloseBtn" class="shortcuts-close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       </div>
       <div id="allNotesList" class="shortcuts-list">
         <!-- dynamically populated -->
@@ -85,7 +85,7 @@
     <div id="settingsPanel" class="shortcuts-panel" style="display:none;">
       <div class="shortcuts-header">
         <span>Settings</span>
-        <button id="settingsCloseBtn" class="shortcuts-close">✕</button>
+        <button id="settingsCloseBtn" class="shortcuts-close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       </div>
       <div class="settings-list">
         <div class="setting-row">
@@ -127,7 +127,7 @@
     <div id="shortcutsPanel" class="shortcuts-panel" style="display:none;">
       <div class="shortcuts-header">
         <span>Keyboard Shortcuts</span>
-        <button id="shortcutsCloseBtn" class="shortcuts-close">✕</button>
+        <button id="shortcutsCloseBtn" class="shortcuts-close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       </div>
       <div class="shortcuts-list">
         <div class="shortcut-row"><kbd>⌘B</kbd><span>Bold</span></div>

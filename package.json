@@ -50,6 +50,7 @@
   },
   "devDependencies": {
     "@electron/rebuild": "^4.0.3",
+    "@rmccue/sfsymbols": "^0.0.2",
     "electron": "^40.6.1",
     "electron-builder": "^25.1.8"
   }
