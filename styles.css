@@ -148,8 +148,7 @@ body {
   height: 22px;
   border-radius: 50%;
   cursor: pointer;
-  font-size: 12px;
-  font-weight: bold;
+  font-size: 13px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -195,7 +194,7 @@ body {
   height: 26px;
   border-radius: 50%;
   cursor: pointer;
-  font-size: 12px;
+  font-size: 14px;
   transition: all 0.2s;
   display: flex;
   align-items: center;
@@ -218,6 +217,14 @@ body {
   background: var(--border-color);
   margin: 0 2px;
 }
+
+/* ── SVG icons in buttons ──────────────────────────────── */
+button svg { display: block; flex-shrink: 0; }
+.icon-btn svg       { width: 12px; height: 12px; }
+.format-btn svg     { width: 13px; height: 13px; }
+.hamburger-btn svg  { width: 13px; height: 13px; }
+.shortcuts-close svg { width: 10px; height: 10px; }
+.note-list-delete svg { width: 9px; height: 9px; }
 
 /* ── Link dialog ───────────────────────────────────────── */
 .link-dialog {
@@ -370,7 +377,7 @@ body {
   height: 26px;
   border-radius: 50%;
   cursor: pointer;
-  font-size: 13px;
+  font-size: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -451,11 +458,6 @@ body {
   width: 248px;
   max-height: min(320px, calc(100% - 86px));
   transform-origin: bottom left;
-}
-
-/* Settings button — make gear icon visibly larger */
-#settingsBtn {
-  font-size: 17px;
 }
 
 /* Settings — pops up from footer gear button */
