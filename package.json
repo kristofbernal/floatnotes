@@ -24,11 +24,28 @@
     "mac": {
       "category": "public.app-category.productivity",
       "icon": "resources/icon.png",
+      "identity": null,
       "target": [
         {
-          "target": "dir"
+          "target": "dmg",
+          "arch": ["arm64"]
+        },
+        {
+          "target": "dir",
+          "arch": ["arm64"]
         }
       ]
+    },
+    "dmg": {
+      "title": "FloatNotes",
+      "contents": [
+        { "x": 130, "y": 220, "type": "file" },
+        { "x": 410, "y": 220, "type": "link", "path": "/Applications" }
+      ],
+      "window": {
+        "width": 540,
+        "height": 380
+      }
     },
     "files": [
       "main.js",

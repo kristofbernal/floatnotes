@@ -1,42 +1,65 @@
-# Floating Notes
+# FloatNotes
 
-A lightweight, always-on-top floating notes app for macOS built with Electron.
+A lightweight, always-on-top floating note-taking app for macOS. Lives in your menu bar and stays above every window so you never lose your notes.
+
+## Download
+
+Download the latest `.dmg` from the [Releases](../../releases) page.
+
+## Install
+
+1. Open the downloaded `FloatNotes-*.dmg` file.
+2. Drag **FloatNote.app** into your **Applications** folder.
+3. Eject the disk image.
+
+## First Launch (Gatekeeper Bypass)
+
+FloatNotes is not signed with an Apple Developer certificate, so macOS will block it on first launch. This is normal for open-source and indie apps distributed outside the App Store.
+
+**To open it anyway:**
+
+### Option A — Right-click method (easiest)
+1. Open **Finder** and go to your **Applications** folder.
+2. **Right-click** (or Control-click) on **FloatNote.app**.
+3. Select **Open** from the context menu.
+4. In the dialog that appears, click **Open** again.
+
+You only need to do this once. After that, double-clicking works normally.
+
+### Option B — System Settings
+1. Try to open FloatNote.app normally (it will be blocked).
+2. Open **System Settings → Privacy & Security**.
+3. Scroll down to the **Security** section.
+4. You'll see a message like *"FloatNote was blocked..."* — click **Open Anyway**.
+5. Confirm by clicking **Open** in the dialog.
+
+### Option C — Terminal (one-liner)
+If both options above fail, run this in Terminal to remove the quarantine flag:
+
+```bash
+xattr -dr com.apple.quarantine /Applications/FloatNote.app
+```
+
+Then open the app normally.
+
+---
 
 ## Features
 
-- **Global Hotkey:** Option+Command+N to open/close the floating window
+- **Global Hotkey:** Option+Command+N to toggle the floating window
 - **Quick Navigation:** Command+Left/Right to switch between notes
-- **Dynamic Window:** Expands as you type, scrolls at 600px height max
-- **Markdown Support:** Bold (**), Italic (*), Underline (__), Bullets, To-Do lists, Links
-- **Auto-Save:** Notes automatically save as you type
+- **Formatting:** Bold, Italic, Underline, Bullets, To-Do checkboxes, Links
+- **Auto-Save:** Notes save automatically as you type
 - **Timestamps:** See when notes were created and last edited
-- **Export:** Copy to clipboard or transfer notes to Apple Notes
-- **System Theme:** Automatically adapts to macOS light/dark mode
+- **Export:** Copy to clipboard or transfer to Apple Notes
 - **Always-On-Top:** Stays visible above all other windows
+- **System Theme:** Adapts to macOS light/dark mode
 
-## Setup
+## Usage
 
-1. Navigate to the project directory:
-```bash
-cd ~/Claude/floating-notes
-```
-
-2. Install dependencies (already done):
-```bash
-npm install
-```
-
-## Running the App
-
-Build and launch the app bundle:
-```bash
-npm run build
-open dist/mac-arm64/FloatNote.app
-```
-
-The app will appear in your menu bar. Notes are stored in `~/.floating-notes/notes.db`.
-
-> **Note:** `npm start` runs the app in dev mode via the generic `Electron.app`. Always use `npm run build` to run the real `FloatNote.app` bundle.
+- The app lives in your **menu bar** (top-right area of your screen).
+- **Left-click** the tray icon to show/hide the notes window.
+- **Option + Cmd + N** toggles the window from anywhere.
 
 ## Keyboard Shortcuts
 
@@ -45,57 +68,29 @@ The app will appear in your menu bar. Notes are stored in `~/.floating-notes/not
 | Option+Cmd+N | Toggle window visibility |
 | Cmd+Left Arrow | Previous note |
 | Cmd+Right Arrow | Next note |
-| Cmd+B | Insert bold markdown |
-| Cmd+I | Insert italic markdown |
-| Cmd+U | Insert underline markdown |
+| Cmd+B | Bold |
+| Cmd+I | Italic |
+| Cmd+U | Underline |
 
-## Toolbar Buttons
+## Requirements
 
-- **B** - Bold (**text**)
-- **I** - Italic (*text*)
-- **U** - Underline (__text__)
-- **•** - Bullet point (- text)
-- **☐** - To-Do item (- [ ] text)
-- **🔗** - Add link ([text](url))
-- **+** - Create new note
-- **−** - Delete current note
+- macOS 13 Ventura or later (Apple Silicon / arm64)
+- macOS 26 Tahoe or later recommended for the liquid glass effect
 
-## Export Features
+## Building from Source
 
-- **Copy to Clipboard** - Copy note content to clipboard
-- **Transfer to Apple Notes** - Create a new note in Apple Notes (opens via AppleScript)
+```bash
+git clone <this-repo>
+cd floating-notes
+npm install
+npm run build
+open dist/mac-arm64/FloatNote.app
+```
 
-## First Run
-
-When you first use the global hotkey (Option+Command+N), macOS may ask for accessibility permissions. Grant them when prompted so the hotkey works properly.
-
-## Notes Storage
-
-Notes are stored in a SQLite database at `~/.floating-notes/notes.db`. Each note contains:
-- Content (raw markdown)
-- Title
-- Creation timestamp
-- Last-edited timestamp
-
-## Development
-
-The app consists of:
-- `main.js` - Electron main process (window management, database, hotkeys)
-- `preload.js` - IPC bridge (secure communication between processes)
-- `renderer.js` - Frontend logic (UI interactions, auto-save)
-- `index.html` - UI structure
-- `styles.css` - Styling with dark/light mode support
+> **Note:** Always use `npm run build`, not `npm start` — the built `.app` bundle is required for the tray icon, global hotkey, and menu bar behavior to work correctly.
 
 ## Known Limitations
 
 - Very long notes (>100k characters) may impact performance
 - Transfer to Apple Notes requires Apple Notes to be installed
-- Liquid Glass doesn't update dynamically when you use other apps
-
-## Future Enhancements
-
-- Note search/filtering
-- Syncing across devices
-- Rich text preview mode
-- Note tagging/organization
-- Customizable window appearance
+- Liquid Glass background doesn't update dynamically on older macOS versions
