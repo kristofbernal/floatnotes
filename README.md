@@ -16,31 +16,27 @@ Download the latest `.dmg` from the [Releases](../../releases) page.
 
 FloatNotes is not signed with an Apple Developer certificate, so macOS will block it on first launch. This is normal for open-source and indie apps distributed outside the App Store.
 
+> **macOS Tahoe (26) note:** The Control-click → "Open" workaround was removed in macOS Sequoia and is no longer available. Use one of the methods below instead.
+
 **To open it anyway:**
 
-### Option A — Right-click method (easiest)
-1. Open **Finder** and go to your **Applications** folder.
-2. **Right-click** (or Control-click) on **FloatNote.app**.
-3. Select **Open** from the context menu.
-4. In the dialog that appears, click **Open** again.
+### Option A — Terminal (most reliable)
+Run this in Terminal **before** opening the app to remove the quarantine flag:
 
-You only need to do this once. After that, double-clicking works normally.
+```bash
+xattr -r -d com.apple.quarantine /Applications/FloatNote.app
+```
+
+Then open the app normally. You only need to do this once.
 
 ### Option B — System Settings
 1. Try to open FloatNote.app normally (it will be blocked).
-2. Open **System Settings → Privacy & Security**.
+2. **Within ~1 hour**, open **System Settings → Privacy & Security**.
 3. Scroll down to the **Security** section.
 4. You'll see a message like *"FloatNote was blocked..."* — click **Open Anyway**.
-5. Confirm by clicking **Open** in the dialog.
+5. Enter your administrator password to confirm.
 
-### Option C — Terminal (one-liner)
-If both options above fail, run this in Terminal to remove the quarantine flag:
-
-```bash
-xattr -dr com.apple.quarantine /Applications/FloatNote.app
-```
-
-Then open the app normally.
+You only need to do this once. After that, double-clicking works normally.
 
 ---
 
