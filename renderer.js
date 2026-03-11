@@ -99,6 +99,16 @@ function initialize() {
     closeAllPanels();
     settingsPanel.style.display = 'flex';
   });
+
+  window.electronAPI.onUpdateDownloaded(() => {
+    // Show persistent notification with click-to-restart
+    notification.textContent = 'Update ready — click to restart';
+    notification.classList.add('show');
+    notification.style.cursor = 'pointer';
+    notification.onclick = () => {
+      window.electronAPI.restartAndInstall();
+    };
+  });
 }
 
 // ─────────────────────────────────────────────────────────

@@ -30,6 +30,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   saveSettings:        (partial) => ipcRenderer.send('save-settings', partial),
   onSettingsLoaded:    (cb) => ipcRenderer.on('load-settings', (_, data) => cb(data)),
   onSettingsData:      (cb) => ipcRenderer.on('settings-data', (_, data) => cb(data)),
-  onOpenSettingsPanel: (cb) => ipcRenderer.on('open-settings-panel', () => cb()),
-  quitApp:             () => ipcRenderer.send('quit-app')
+  onOpenSettingsPanel:  (cb) => ipcRenderer.on('open-settings-panel', () => cb()),
+  onUpdateDownloaded:   (cb) => ipcRenderer.on('update-downloaded', () => cb()),
+  quitApp:              () => ipcRenderer.send('quit-app'),
+  restartAndInstall:    () => ipcRenderer.send('restart-and-install')
 });

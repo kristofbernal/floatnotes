@@ -1,4 +1,5 @@
-const { app, BrowserWindow, ipcMain, globalShortcut, clipboard, Tray, nativeImage, Menu } = require('electron');
+const { app, BrowserWindow, ipcMain, globalShortcut, clipboard, Tray, nativeImage, Menu, nativeTheme } = require('electron');
+const { autoUpdater } = require('electron-updater');
 const path = require('path');
 const fs = require('fs');
 const Database = require('better-sqlite3');
@@ -162,11 +163,16 @@ app.on('ready', () => {
   }
   app.setLoginItemSettings({ openAtLogin: appSettings.launchAtLogin });
 
+  // Apply saved theme to Chromium's rendering engine so color-scheme is respected
+  nativeTheme.themeSource = appSettings.theme === 'system' ? 'system' : appSettings.theme;
+
   createWindow();
 
-  // Menu Bar tray icon
-  const trayIcon = nativeImage.createFromPath(path.join(__dirname, 'resources', 'icon.png'))
-    .resize({ width: 16, height: 16 });
+  // Menu Bar tray icon — use extraResources path when packaged, dev path otherwise
+  const iconPath = app.isPackaged
+    ? path.join(process.resourcesPath, 'icon.png')
+    : path.join(__dirname, 'resources', 'icon.png');
+  const trayIcon = nativeImage.createFromPath(iconPath).resize({ width: 16, height: 16 });
   trayIcon.setTemplateImage(true);
   tray = new Tray(trayIcon);
   tray.setToolTip('FloatNote');
@@ -184,10 +190,24 @@ app.on('ready', () => {
           mainWindow.webContents.send('open-settings-panel');
         }
       },
+      {
+        label: 'Check for Updates',
+        click: () => { autoUpdater.checkForUpdatesAndNotify(); }
+      },
       { type: 'separator' },
       { label: 'Quit FloatNotes', click: () => app.quit() }
     ]);
     tray.popUpContextMenu(contextMenu);
+  });
+
+  // Auto-updater setup
+  autoUpdater.checkForUpdatesAndNotify();
+  autoUpdater.on('update-downloaded', () => {
+    if (mainWindow) mainWindow.webContents.send('update-downloaded');
+  });
+
+  ipcMain.on('restart-and-install', () => {
+    autoUpdater.quitAndInstall();
   });
 
   // Register global hotkey: Option+Command+N
@@ -372,6 +392,9 @@ ipcMain.on('save-settings', (event, partial) => {
   }
   if ('launchAtLogin' in partial) {
     app.setLoginItemSettings({ openAtLogin: appSettings.launchAtLogin });
+  }
+  if ('theme' in partial) {
+    nativeTheme.themeSource = appSettings.theme === 'system' ? 'system' : appSettings.theme;
   }
 
   event.reply('settings-data', appSettings);

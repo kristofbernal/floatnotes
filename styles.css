@@ -25,6 +25,7 @@ input, button, textarea, select {
   --button-hover: rgba(0, 0, 0, 0.07);
   --button-hover-strong: rgba(0, 0, 0, 0.13);
   --accent: #007AFF;
+  color-scheme: light;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -39,6 +40,7 @@ input, button, textarea, select {
     --button-hover: rgba(255, 255, 255, 0.1);
     --button-hover-strong: rgba(255, 255, 255, 0.17);
     --accent: #0A84FF;
+    color-scheme: dark;
   }
 }
 
@@ -842,6 +844,7 @@ kbd {
   --button-hover:        rgba(0, 0, 0, 0.07);
   --button-hover-strong: rgba(0, 0, 0, 0.13);
   --accent:              #007AFF;
+  color-scheme: light;
 }
 
 [data-theme="dark"] {
@@ -854,4 +857,5 @@ kbd {
   --button-hover:        rgba(255, 255, 255, 0.1);
   --button-hover-strong: rgba(255, 255, 255, 0.17);
   --accent:              #0A84FF;
+  color-scheme: dark;
 }

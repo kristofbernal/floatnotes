@@ -1,6 +1,6 @@
 {
   "name": "floatnote",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Always-on-top floating notes app for macOS",
   "main": "main.js",
   "scripts": {
@@ -21,6 +21,14 @@
       "buildResources": "resources",
       "output": "dist"
     },
+    "publish": {
+      "provider": "github",
+      "owner": "kristofbernal",
+      "repo": "floatnotes"
+    },
+    "extraResources": [
+      { "from": "resources/icon.png", "to": "icon.png" }
+    ],
     "mac": {
       "category": "public.app-category.productivity",
       "icon": "resources/icon.png",
@@ -28,6 +36,10 @@
       "target": [
         {
           "target": "dmg",
+          "arch": ["arm64"]
+        },
+        {
+          "target": "zip",
           "arch": ["arm64"]
         },
         {
@@ -39,8 +51,17 @@
     "dmg": {
       "title": "FloatNotes",
       "contents": [
-        { "x": 130, "y": 220, "type": "file" },
-        { "x": 410, "y": 220, "type": "link", "path": "/Applications" }
+        {
+          "x": 130,
+          "y": 220,
+          "type": "file"
+        },
+        {
+          "x": 410,
+          "y": 220,
+          "type": "link",
+          "path": "/Applications"
+        }
       ],
       "window": {
         "width": 540,
@@ -63,6 +84,7 @@
   "dependencies": {
     "better-sqlite3": "^12.6.2",
     "electron-liquid-glass": "^1.1.1",
+    "electron-updater": "^6.8.3",
     "marked": "^17.0.3"
   },
   "devDependencies": {

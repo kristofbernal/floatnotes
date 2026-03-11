@@ -1,0 +1,50 @@
+name: Build and Release
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  release:
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read version
+        id: version
+        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+
+      - name: Check if release already exists
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if gh release view "v${{ steps.version.outputs.version }}" >/dev/null 2>&1; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Skip if release exists
+        if: steps.check.outputs.exists == 'true'
+        run: echo "Release v${{ steps.version.outputs.version }} already exists — skipping build."
+
+      - uses: actions/setup-node@v4
+        if: steps.check.outputs.exists != 'true'
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        if: steps.check.outputs.exists != 'true'
+        run: npm ci
+
+      - name: Rebuild native modules for Electron
+        if: steps.check.outputs.exists != 'true'
+        run: npx electron-rebuild || true
+
+      - name: Build and publish to GitHub Releases
+        if: steps.check.outputs.exists != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm run build -- --publish always
