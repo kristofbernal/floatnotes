@@ -100,6 +100,10 @@ function initialize() {
     settingsPanel.style.display = 'flex';
   });
 
+  window.electronAPI.onUpdateNotAvailable(() => {
+    showNotification('You\'re up to date!');
+  });
+
   window.electronAPI.onUpdateDownloaded(() => {
     // Show persistent notification with click-to-restart
     notification.textContent = 'Update ready — click to restart';

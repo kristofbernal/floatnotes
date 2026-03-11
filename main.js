@@ -205,6 +205,9 @@ app.on('ready', () => {
   autoUpdater.on('update-downloaded', () => {
     if (mainWindow) mainWindow.webContents.send('update-downloaded');
   });
+  autoUpdater.on('update-not-available', () => {
+    if (mainWindow) mainWindow.webContents.send('update-not-available');
+  });
 
   ipcMain.on('restart-and-install', () => {
     autoUpdater.quitAndInstall();
