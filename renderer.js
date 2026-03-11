@@ -391,6 +391,11 @@ quitAppBtn.addEventListener('click', () => {
   window.electronAPI.quitApp();
 });
 
+document.getElementById('checkUpdatesBtn').addEventListener('click', () => {
+  window.electronAPI.checkForUpdates();
+  showNotification('Checking for updates…');
+});
+
 settingsPanel.addEventListener('click', (e) => {
   const toggle = e.target.closest('.toggle-switch');
   if (toggle) {

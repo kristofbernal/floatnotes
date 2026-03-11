@@ -539,6 +539,22 @@ button svg { display: block; flex-shrink: 0; }
   border-top: 1px solid var(--border-color);
 }
 
+.update-btn {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  width: 100%;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  cursor: pointer;
+  margin-bottom: 5px;
+}
+
+.update-btn:hover {
+  background: var(--button-hover);
+}
+
 .danger-btn {
   background: rgba(255, 59, 48, 0.1);
   border: 1px solid rgba(255, 59, 48, 0.3);

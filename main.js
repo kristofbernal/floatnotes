@@ -210,6 +210,10 @@ app.on('ready', () => {
     autoUpdater.quitAndInstall();
   });
 
+  ipcMain.on('check-for-updates', () => {
+    autoUpdater.checkForUpdatesAndNotify();
+  });
+
   // Register global hotkey: Option+Command+N
   const ret = globalShortcut.register('Option+Cmd+n', () => {
     toggleWindow();
