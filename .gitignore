@@ -3,3 +3,11 @@ dist/
 *.db
 *.log
 .DS_Store
+
+# Environment / secrets
+.env
+.env.*
+*.env
+
+# Local Claude Code settings
+.claude/settings.local.json
