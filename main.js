@@ -1,9 +1,9 @@
-const { app, BrowserWindow, ipcMain, globalShortcut, clipboard, Tray, nativeImage, Menu, nativeTheme } = require('electron');
-const { autoUpdater } = require('electron-updater');
+const { app, BrowserWindow, ipcMain, globalShortcut, clipboard, Tray, nativeImage, Menu, nativeTheme, shell } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const https = require('https');
 const Database = require('better-sqlite3');
-const { execSync } = require('child_process');
+const { execSync, spawn } = require('child_process');
 const os = require('os');
 
 // Native Liquid Glass — NSGlassEffectView (macOS 26 Tahoe+)
@@ -68,13 +68,97 @@ db.exec(`
 
 let mainWindow;
 let tray;
-let manualUpdateCheck = false;
+let pendingUpdateZip = null;
 let currentNoteId = null;
 let windowVisible = true;
 let registeredShortcut = null;
 const COMPACT_HEIGHT = 300;
 const EXPANDED_HEIGHT = 680;
 const WINDOW_WIDTH = 380;
+
+// ── DIY Updater (bypasses Squirrel.Mac, works without code signing) ───────────
+
+function fetchJSON(url) {
+  return new Promise((resolve, reject) => {
+    https.get(url, { headers: { 'User-Agent': 'FloatNotes-Updater' } }, (res) => {
+      if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+        return fetchJSON(res.headers.location).then(resolve).catch(reject);
+      }
+      let data = '';
+      res.on('data', chunk => data += chunk);
+      res.on('end', () => { try { resolve(JSON.parse(data)); } catch (e) { reject(e); } });
+    }).on('error', reject);
+  });
+}
+
+function downloadFile(url, dest) {
+  return new Promise((resolve, reject) => {
+    function get(u) {
+      https.get(u, { headers: { 'User-Agent': 'FloatNotes-Updater' } }, (res) => {
+        if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+          return get(res.headers.location);
+        }
+        const file = fs.createWriteStream(dest);
+        res.pipe(file);
+        file.on('finish', () => file.close(resolve));
+        file.on('error', reject);
+      }).on('error', reject);
+    }
+    get(url);
+  });
+}
+
+async function checkAndUpdate(manual = false) {
+  if (!app.isPackaged) {
+    if (manual && mainWindow) mainWindow.webContents.send('update-not-available');
+    return;
+  }
+  try {
+    const release = await fetchJSON('https://api.github.com/repos/kristofbernal/floatnotes/releases/latest');
+    const latest = release.tag_name.replace('v', '');
+    if (latest === app.getVersion()) {
+      if (manual && mainWindow) mainWindow.webContents.send('update-not-available');
+      return;
+    }
+    const zipAsset = release.assets.find(a => a.name.includes('mac') && a.name.endsWith('.zip'));
+    if (!zipAsset) return;
+    const tmpDir  = path.join(os.tmpdir(), 'floatnotes-update');
+    fs.mkdirSync(tmpDir, { recursive: true });
+    const zipPath = path.join(tmpDir, 'FloatNotes-update.zip');
+    await downloadFile(zipAsset.browser_download_url, zipPath);
+    pendingUpdateZip = zipPath;
+    if (mainWindow) mainWindow.webContents.send('update-downloaded');
+  } catch (e) {
+    console.error('Update check failed:', e.message);
+  }
+}
+
+function installUpdate() {
+  if (!pendingUpdateZip) return;
+  // /Applications/FloatNotes.app/Contents/MacOS/FloatNotes → /Applications/FloatNotes.app
+  const appPath  = path.dirname(path.dirname(path.dirname(process.execPath)));
+  const appsDir  = path.dirname(appPath);
+  const zip      = pendingUpdateZip;
+  const tmpDir   = path.dirname(zip);
+
+  const script = [
+    '#!/bin/bash',
+    'sleep 2',
+    `rm -rf "${appPath}"`,
+    `/usr/bin/ditto -xk "${zip}" "${appsDir}"`,
+    `touch "${appPath}/Contents/MacOS/FloatNotes"`,
+    `open "${appPath}"`,
+    `rm -rf "${tmpDir}"`,
+  ].join('\n');
+
+  const scriptPath = path.join(tmpDir, 'install.sh');
+  fs.writeFileSync(scriptPath, script, { mode: 0o755 });
+  const child = spawn('/bin/bash', [scriptPath], { detached: true, stdio: 'ignore' });
+  child.unref();
+  app.quit();
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -169,6 +253,15 @@ function toggleWindow() {
 // Keep the app alive when the window is closed (Tray keeps it running)
 app.on('window-all-closed', (e) => e.preventDefault());
 
+// Dock icon click — show window if hidden
+app.on('activate', () => {
+  if (mainWindow && !windowVisible) {
+    mainWindow.show();
+    mainWindow.focus();
+    windowVisible = true;
+  }
+});
+
 app.on('ready', () => {
   // Apply dock setting from persisted preferences
   if (appSettings.showInDock) {
@@ -182,6 +275,21 @@ app.on('ready', () => {
   nativeTheme.themeSource = appSettings.theme === 'system' ? 'system' : appSettings.theme;
 
   createWindow();
+
+  // Native macOS application menu (FloatNotes > Check for Updates)
+  Menu.setApplicationMenu(Menu.buildFromTemplate([
+    {
+      label: 'FloatNotes',
+      submenu: [
+        {
+          label: 'Check for Updates…',
+          click: () => checkAndUpdate(true)
+        },
+        { type: 'separator' },
+        { label: 'Quit FloatNotes', accelerator: 'Cmd+Q', click: () => app.quit() }
+      ]
+    }
+  ]));
 
   // Menu Bar tray icon — use extraResources path when packaged, dev path otherwise
   const iconPath = app.isPackaged
@@ -207,7 +315,7 @@ app.on('ready', () => {
       },
       {
         label: 'Check for Updates',
-        click: () => { manualUpdateCheck = true; autoUpdater.checkForUpdatesAndNotify(); }
+        click: () => checkAndUpdate(true)
       },
       { type: 'separator' },
       { label: 'Quit FloatNotes', click: () => app.quit() }
@@ -215,24 +323,11 @@ app.on('ready', () => {
     tray.popUpContextMenu(contextMenu);
   });
 
-  // Auto-updater setup
-  autoUpdater.checkForUpdatesAndNotify();
-  autoUpdater.on('update-downloaded', () => {
-    if (mainWindow) mainWindow.webContents.send('update-downloaded');
-    manualUpdateCheck = false;
-  });
-  autoUpdater.on('update-not-available', () => {
-    if (mainWindow) mainWindow.webContents.send('update-not-available');
-  });
+  // Check for updates on launch
+  checkAndUpdate();
 
-  ipcMain.on('restart-and-install', () => {
-    autoUpdater.quitAndInstall();
-  });
-
-  ipcMain.on('check-for-updates', () => {
-    manualUpdateCheck = true;
-    autoUpdater.checkForUpdatesAndNotify();
-  });
+  ipcMain.on('restart-and-install', () => installUpdate());
+  ipcMain.on('check-for-updates', () => checkAndUpdate(true));
 
   // Register global hotkey (customizable)
   const ret = registerGlobalShortcut(appSettings.globalShortcut || 'Option+Cmd+N');
