@@ -20,7 +20,7 @@ FloatNotes is not signed with an Apple Developer certificate, so macOS will bloc
 
 **To open it anyway:**
 
-### Option A — Terminal (most reliable)
+### Terminal (most reliable)
 Run this in Terminal **before** opening the app to remove the quarantine flag:
 
 ```bash
@@ -28,15 +28,6 @@ xattr -r -d com.apple.quarantine /Applications/FloatNote.app
 ```
 
 Then open the app normally. You only need to do this once.
-
-### Option B — System Settings
-1. Try to open FloatNote.app normally (it will be blocked).
-2. **Within ~1 hour**, open **System Settings → Privacy & Security**.
-3. Scroll down to the **Security** section.
-4. You'll see a message like *"FloatNote was blocked..."* — click **Open Anyway**.
-5. Enter your administrator password to confirm.
-
-You only need to do this once. After that, double-clicking works normally.
 
 ---
 
@@ -90,3 +81,4 @@ open dist/mac-arm64/FloatNote.app
 - Very long notes (>100k characters) may impact performance
 - Transfer to Apple Notes requires Apple Notes to be installed
 - Liquid Glass background doesn't update dynamically on older macOS versions
+- Option+Cmd+N shortcut might conflict with Little Arc if Arc is your main browser. Will fix this in the next update.
