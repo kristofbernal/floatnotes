@@ -68,6 +68,7 @@ db.exec(`
 
 let mainWindow;
 let tray;
+let manualUpdateCheck = false;
 let currentNoteId = null;
 let windowVisible = true;
 let registeredShortcut = null;
@@ -206,7 +207,7 @@ app.on('ready', () => {
       },
       {
         label: 'Check for Updates',
-        click: () => { autoUpdater.checkForUpdatesAndNotify(); }
+        click: () => { manualUpdateCheck = true; autoUpdater.checkForUpdatesAndNotify(); }
       },
       { type: 'separator' },
       { label: 'Quit FloatNotes', click: () => app.quit() }
@@ -217,7 +218,8 @@ app.on('ready', () => {
   // Auto-updater setup
   autoUpdater.checkForUpdatesAndNotify();
   autoUpdater.on('update-downloaded', () => {
-    if (mainWindow) mainWindow.webContents.send('update-downloaded');
+    if (mainWindow) mainWindow.webContents.send('update-downloaded', { manual: manualUpdateCheck });
+    manualUpdateCheck = false;
   });
   autoUpdater.on('update-not-available', () => {
     if (mainWindow) mainWindow.webContents.send('update-not-available');
@@ -228,6 +230,7 @@ app.on('ready', () => {
   });
 
   ipcMain.on('check-for-updates', () => {
+    manualUpdateCheck = true;
     autoUpdater.checkForUpdatesAndNotify();
   });
 
@@ -257,7 +260,10 @@ app.on('ready', () => {
     const notes = db.prepare('SELECT id, title FROM notes ORDER BY createdAt ASC').all();
     const currentNote = db.prepare('SELECT * FROM notes WHERE id = ?').get(currentNoteId);
     mainWindow.webContents.send('load-notes', { notes, currentNote });
-    mainWindow.webContents.send('load-settings', appSettings);
+    const _iconPath = app.isPackaged
+      ? path.join(process.resourcesPath, 'icon.png')
+      : path.join(__dirname, 'resources', 'icon.png');
+    mainWindow.webContents.send('load-settings', { ...appSettings, _iconPath });
   });
 });
 

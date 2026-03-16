@@ -93,6 +93,10 @@ function initialize() {
   window.electronAPI.onSettingsLoaded((settings) => {
     renderSettings(settings);
     applySettingsToDOM(settings);
+    if (settings._iconPath) {
+      const icon = document.getElementById('onboardingAppIcon');
+      if (icon) icon.src = 'file://' + settings._iconPath;
+    }
     if (!settings.onboarded) showOnboarding();
   });
 
@@ -110,14 +114,16 @@ function initialize() {
     showNotification('You\'re up to date!');
   });
 
-  window.electronAPI.onUpdateDownloaded(() => {
-    // Show persistent notification with click-to-restart
-    notification.textContent = 'Update ready — click to restart';
-    notification.classList.add('show');
-    notification.style.cursor = 'pointer';
-    notification.onclick = () => {
-      window.electronAPI.restartAndInstall();
-    };
+  window.electronAPI.onUpdateDownloaded((data) => {
+    if (data && data.manual) {
+      showNotification('Update found! Restarting…');
+      setTimeout(() => window.electronAPI.restartAndInstall(), 1500);
+    } else {
+      notification.textContent = 'Update ready — click to restart';
+      notification.classList.add('show');
+      notification.style.cursor = 'pointer';
+      notification.onclick = () => window.electronAPI.restartAndInstall();
+    }
   });
 }
 

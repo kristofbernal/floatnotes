@@ -875,6 +875,14 @@ kbd {
   width: 100%;
 }
 
+.onboarding-app-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 18px;
+  margin-bottom: 12px;
+  display: block;
+}
+
 .onboarding-title {
   font-size: 18px;
   font-weight: 700;

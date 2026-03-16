@@ -1,6 +1,6 @@
 {
   "name": "floatnotes",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Always-on-top floating notes app for macOS",
   "main": "main.js",
   "scripts": {
@@ -27,14 +27,15 @@
       "repo": "floatnotes"
     },
     "extraResources": [
-      { "from": "resources/icon.png",              "to": "icon.png" },
-      { "from": "resources/icon-dark.icns",        "to": "icon-dark.icns" },
-      { "from": "resources/icon-clear-light.icns", "to": "icon-clear-light.icns" },
-      { "from": "resources/icon-clear-dark.icns",  "to": "icon-clear-dark.icns" }
+      { "from": "resources/icon.png", "to": "icon.png" },
+      { "from": "resources/compiled-icon/Assets.car", "to": "Assets.car" }
     ],
     "mac": {
       "category": "public.app-category.productivity",
-      "icon": "resources/icon.icns",
+      "icon": "resources/compiled-icon/FloatNotes Icon.icns",
+      "extendInfo": {
+        "CFBundleIconName": "FloatNotes Icon"
+      },
       "identity": null,
       "target": [
         {
