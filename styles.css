@@ -849,6 +849,144 @@ kbd {
   color: white;
 }
 
+/* ── Onboarding overlay ────────────────────────────────── */
+.onboarding-overlay {
+  position: absolute;
+  inset: 0;
+  background: var(--panel-bg);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-radius: 18px;
+  z-index: 9000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-app-region: no-drag;
+}
+
+.onboarding-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 28px 22px;
+  width: 100%;
+}
+
+.onboarding-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-align: center;
+}
+
+.onboarding-subtitle {
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-align: center;
+  line-height: 1.4;
+  margin-top: -6px;
+}
+
+.onboarding-features {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.onboarding-feature {
+  font-size: 12px;
+  color: var(--text-secondary);
+  padding: 5px 10px;
+  background: var(--button-hover);
+  border-radius: 6px;
+  text-align: center;
+}
+
+.onboarding-shortcut-section {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  align-items: center;
+}
+
+.onboarding-shortcut-label {
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.onboarding-cta {
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  -webkit-app-region: no-drag;
+}
+
+.onboarding-cta:hover {
+  opacity: 0.85;
+}
+
+/* ── Shortcut recorder ─────────────────────────────────── */
+.shortcut-recorder {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  -webkit-app-region: no-drag;
+}
+
+.shortcut-display {
+  font-family: 'SF Mono', Monaco, monospace;
+  font-size: 12px;
+  background: var(--button-hover);
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+  padding: 3px 8px;
+  color: var(--text-primary);
+  min-width: 52px;
+  text-align: center;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.shortcut-display.recording {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.25);
+  animation: shortcut-pulse 1s ease-in-out infinite;
+}
+
+@keyframes shortcut-pulse {
+  0%, 100% { border-color: var(--accent); }
+  50%       { border-color: rgba(0, 122, 255, 0.3); }
+}
+
+.shortcut-record-btn {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+  -webkit-app-region: no-drag;
+}
+
+.shortcut-record-btn:hover {
+  background: var(--button-hover);
+  color: var(--text-primary);
+}
+
+.shortcut-hint {
+  font-size: 10px;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
 /* ── Forced light/dark theme overrides ─────────────────── */
 [data-theme="light"] {
   --bg-primary:          rgba(255, 255, 255, 0);

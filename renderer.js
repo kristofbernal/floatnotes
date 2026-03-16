@@ -51,6 +51,11 @@ let titleSaveTimeout;
 let focusTitleOnNextLoad = false;
 let savedSelection = null; // for restoring caret after link dialog
 
+// Shortcut recorder state
+let isRecording = false;
+let activeRecorder = null; // 'onboarding' | 'settings'
+let pendingShortcut = null;
+
 // ─────────────────────────────────────────────────────────
 // Init
 // ─────────────────────────────────────────────────────────
@@ -88,6 +93,7 @@ function initialize() {
   window.electronAPI.onSettingsLoaded((settings) => {
     renderSettings(settings);
     applySettingsToDOM(settings);
+    if (!settings.onboarded) showOnboarding();
   });
 
   window.electronAPI.onSettingsData((settings) => {
@@ -277,6 +283,14 @@ function renderSettings(settings) {
       btn.classList.toggle('active', btn.dataset.value === settings[key]);
     });
   });
+  // Update shortcut displays
+  const displayText = acceleratorToDisplay(settings.globalShortcut || 'Option+Cmd+N');
+  const settingsDisplay  = document.getElementById('settingsShortcutDisplay');
+  const onboardingDisplay = document.getElementById('onboardingShortcutDisplay');
+  const toggleKbd         = document.getElementById('toggleShortcutKbd');
+  if (settingsDisplay && !isRecording)   settingsDisplay.textContent  = displayText;
+  if (onboardingDisplay && !isRecording) onboardingDisplay.textContent = displayText;
+  if (toggleKbd) toggleKbd.textContent = displayText;
 }
 
 allNotesBtn.addEventListener('click', () => {
@@ -615,6 +629,7 @@ editor.addEventListener('input', () => {
 // Keydown — shortcuts + space auto-formatting
 // ─────────────────────────────────────────────────────────
 editor.addEventListener('keydown', (e) => {
+  if (isRecording) return; // let recorder capture keystrokes
 
   // ── Space-triggered auto-formatting ──────────────────
   if (e.key === ' ') {
@@ -765,6 +780,132 @@ editor.addEventListener('keydown', (e) => {
     e.preventDefault();
     window.electronAPI.copyToClipboard(getPlainText());
   }
+});
+
+// ─────────────────────────────────────────────────────────
+// Shortcut utilities
+// ─────────────────────────────────────────────────────────
+function keydownToAccelerator(e) {
+  const parts = [];
+  if (e.metaKey)  parts.push('Cmd');
+  if (e.ctrlKey)  parts.push('Ctrl');
+  if (e.altKey)   parts.push('Option');
+  if (e.shiftKey) parts.push('Shift');
+  const key = e.key;
+  if (['Meta', 'Control', 'Alt', 'Shift'].includes(key)) return null;
+  const keyMap = {
+    ' ': 'Space', 'ArrowUp': 'Up', 'ArrowDown': 'Down',
+    'ArrowLeft': 'Left', 'ArrowRight': 'Right',
+    'Backspace': 'Backspace', 'Delete': 'Delete', 'Tab': 'Tab',
+    'Enter': 'Return', 'Escape': 'Escape',
+    'F1':'F1','F2':'F2','F3':'F3','F4':'F4','F5':'F5','F6':'F6',
+    'F7':'F7','F8':'F8','F9':'F9','F10':'F10','F11':'F11','F12':'F12'
+  };
+  const mapped = keyMap[key] || (key.length === 1 ? key.toUpperCase() : key);
+  parts.push(mapped);
+  return parts.join('+');
+}
+
+function acceleratorToDisplay(accel) {
+  if (!accel) return '';
+  return accel
+    .replace(/\bCmd\b/g,       '⌘')
+    .replace(/\bCtrl\b/g,      '⌃')
+    .replace(/\bOption\b/g,    '⌥')
+    .replace(/\bShift\b/g,     '⇧')
+    .replace(/\bReturn\b/g,    '⏎')
+    .replace(/\bBackspace\b/g, '⌫')
+    .replace(/\bDelete\b/g,    '⌦')
+    .replace(/\bEscape\b/g,    '⎋')
+    .replace(/\bSpace\b/g,     '␣')
+    .replace(/\+/g, ''); // strip separators last
+}
+
+function isValidShortcut(accel) {
+  if (!accel) return false;
+  if (!/\b(Cmd|Ctrl|Option)\b/.test(accel)) return false;
+  const reserved = ['Cmd+Space', 'Cmd+Tab', 'Cmd+Shift+3', 'Cmd+Shift+4', 'Cmd+Shift+5'];
+  if (reserved.includes(accel)) return false;
+  return true;
+}
+
+// ─────────────────────────────────────────────────────────
+// Shortcut recorder
+// ─────────────────────────────────────────────────────────
+function startRecording(context) {
+  isRecording = true;
+  activeRecorder = context;
+  pendingShortcut = null;
+  const display = document.getElementById(context === 'onboarding' ? 'onboardingShortcutDisplay' : 'settingsShortcutDisplay');
+  const hint    = document.getElementById(context === 'onboarding' ? 'onboardingShortcutHint'    : 'settingsShortcutHint');
+  if (display) display.classList.add('recording');
+  if (hint) hint.style.display = '';
+  window.addEventListener('keydown', handleRecorderKeydown, true);
+}
+
+function stopRecording(save) {
+  const context = activeRecorder;
+  isRecording = false;
+  activeRecorder = null;
+  window.removeEventListener('keydown', handleRecorderKeydown, true);
+  const display = document.getElementById(context === 'onboarding' ? 'onboardingShortcutDisplay' : 'settingsShortcutDisplay');
+  const hint    = document.getElementById(context === 'onboarding' ? 'onboardingShortcutHint'    : 'settingsShortcutHint');
+  if (display) display.classList.remove('recording');
+  if (hint) hint.style.display = 'none';
+  if (save && pendingShortcut) {
+    window.electronAPI.saveSettings({ globalShortcut: pendingShortcut });
+  }
+  pendingShortcut = null;
+}
+
+function handleRecorderKeydown(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  if (e.key === 'Escape') { stopRecording(false); return; }
+  const accel = keydownToAccelerator(e);
+  if (!accel) return; // modifier-only press — wait for a real key
+  if (!isValidShortcut(accel)) {
+    const display = document.getElementById(activeRecorder === 'onboarding' ? 'onboardingShortcutDisplay' : 'settingsShortcutDisplay');
+    if (display) {
+      const prev = display.textContent;
+      display.textContent = 'Reserved!';
+      setTimeout(() => { if (display) display.textContent = prev; }, 1000);
+    }
+    return;
+  }
+  pendingShortcut = accel;
+  const display = document.getElementById(activeRecorder === 'onboarding' ? 'onboardingShortcutDisplay' : 'settingsShortcutDisplay');
+  if (display) display.textContent = acceleratorToDisplay(accel);
+  stopRecording(true);
+}
+
+// ─────────────────────────────────────────────────────────
+// Onboarding
+// ─────────────────────────────────────────────────────────
+const onboardingOverlay    = document.getElementById('onboardingOverlay');
+const onboardingDismissBtn = document.getElementById('onboardingDismissBtn');
+const onboardingRecordBtn  = document.getElementById('onboardingRecordBtn');
+const settingsRecordBtn    = document.getElementById('settingsRecordBtn');
+
+function showOnboarding() {
+  onboardingOverlay.style.display = 'flex';
+}
+
+function dismissOnboarding() {
+  onboardingOverlay.style.display = 'none';
+  window.electronAPI.saveSettings({ onboarded: true });
+}
+
+onboardingDismissBtn.addEventListener('click', dismissOnboarding);
+
+onboardingRecordBtn.addEventListener('click', () => {
+  if (isRecording && activeRecorder === 'onboarding') stopRecording(false);
+  else startRecording('onboarding');
+});
+
+settingsRecordBtn.addEventListener('click', () => {
+  if (isRecording && activeRecorder === 'settings') stopRecording(false);
+  else startRecording('settings');
 });
 
 // ─────────────────────────────────────────────────────────

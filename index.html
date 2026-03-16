@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Floating Notes</title>
+  <title>FloatNotes</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -117,6 +117,15 @@
             <button class="seg-btn" data-value="dark">Dark</button>
           </div>
         </div>
+        <div class="settings-divider"></div>
+        <div class="setting-row">
+          <span class="setting-label">Toggle Shortcut</span>
+          <div class="shortcut-recorder">
+            <span class="shortcut-display" id="settingsShortcutDisplay">⌥⌘N</span>
+            <button class="shortcut-record-btn" id="settingsRecordBtn">Edit</button>
+          </div>
+        </div>
+        <span class="shortcut-hint" id="settingsShortcutHint" style="display:none; padding: 0 12px 4px;">Press your desired key combination…</span>
       </div>
       <div class="all-notes-footer">
         <button id="checkUpdatesBtn" class="update-btn">Check for Updates</button>
@@ -142,7 +151,29 @@
         <div class="shortcut-row"><kbd>⌘→</kbd><span>Next note</span></div>
         <div class="shortcut-row"><kbd>-</kbd> + <kbd>Space</kbd><span>Bullet point</span></div>
         <div class="shortcut-row"><kbd>[]</kbd> + <kbd>Space</kbd><span>To-do item</span></div>
-        <div class="shortcut-row"><kbd>⌥⌘N</kbd><span>Toggle window</span></div>
+        <div class="shortcut-row"><kbd id="toggleShortcutKbd">⌥⌘N</kbd><span>Toggle window</span></div>
+      </div>
+    </div>
+
+    <!-- Onboarding overlay (first-run) -->
+    <div id="onboardingOverlay" class="onboarding-overlay" style="display:none;">
+      <div class="onboarding-card">
+        <div class="onboarding-title">Welcome to FloatNotes</div>
+        <div class="onboarding-subtitle">A floating notepad that lives in your menu bar.</div>
+        <div class="onboarding-features">
+          <div class="onboarding-feature">Always on top of other windows</div>
+          <div class="onboarding-feature">Notes saved automatically</div>
+          <div class="onboarding-feature">Toggle with a global shortcut</div>
+        </div>
+        <div class="onboarding-shortcut-section">
+          <div class="onboarding-shortcut-label">Global Toggle Shortcut</div>
+          <div class="shortcut-recorder">
+            <span class="shortcut-display" id="onboardingShortcutDisplay">⌥⌘N</span>
+            <button class="shortcut-record-btn" id="onboardingRecordBtn">Customize</button>
+          </div>
+          <span class="shortcut-hint" id="onboardingShortcutHint" style="display:none;">Press your desired key combination…</span>
+        </div>
+        <button class="onboarding-cta" id="onboardingDismissBtn">Get Started</button>
       </div>
     </div>
 
