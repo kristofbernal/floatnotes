@@ -20,7 +20,7 @@ FloatNotes is not signed with an Apple Developer certificate, so macOS will bloc
 
 **To open it anyway:**
 
-### Terminal (most reliable)
+### Terminal
 Run this in Terminal **before** opening the app to remove the quarantine flag:
 
 ```bash
@@ -67,7 +67,7 @@ Then open the app normally. You only need to do this once.
 
 > **Note:** Liquid Glass app icon variants are coming soon — still working on getting them just right.
 
-## Building from Source
+## Building from Source (Developer only)
 
 ```bash
 git clone <this-repo>
