@@ -19,19 +19,22 @@ try {
 const SETTINGS_PATH = path.join(os.homedir(), '.floating-notes', 'settings.json');
 
 const DEFAULT_SETTINGS = {
-  showInDock:    false,
-  alwaysOnTop:   true,
-  launchAtLogin: false,
-  fontSize:      'medium',  // 'small' | 'medium' | 'large'
-  theme:         'system'   // 'system' | 'light' | 'dark'
+  showInDock:     false,
+  alwaysOnTop:    true,
+  launchAtLogin:  false,
+  fontSize:       'medium',       // 'small' | 'medium' | 'large'
+  theme:          'system',       // 'system' | 'light' | 'dark'
+  globalShortcut: 'Option+Cmd+N', // customizable global toggle shortcut
+  onboarded:      false           // first-run gate
 };
 
 function loadSettings() {
   try {
     const raw = fs.readFileSync(SETTINGS_PATH, 'utf8');
-    return { ...DEFAULT_SETTINGS, ...JSON.parse(raw) };
+    // Existing installs skip onboarding; fresh installs (catch branch) show it
+    return { ...DEFAULT_SETTINGS, onboarded: true, ...JSON.parse(raw) };
   } catch (e) {
-    return { ...DEFAULT_SETTINGS };
+    return { ...DEFAULT_SETTINGS }; // fresh install → onboarded:false triggers onboarding
   }
 }
 
@@ -67,6 +70,7 @@ let mainWindow;
 let tray;
 let currentNoteId = null;
 let windowVisible = true;
+let registeredShortcut = null;
 const COMPACT_HEIGHT = 300;
 const EXPANDED_HEIGHT = 680;
 const WINDOW_WIDTH = 380;
@@ -140,6 +144,16 @@ function createWindow() {
   }
 }
 
+function registerGlobalShortcut(accelerator) {
+  if (registeredShortcut) {
+    globalShortcut.unregister(registeredShortcut);
+    registeredShortcut = null;
+  }
+  const success = globalShortcut.register(accelerator, toggleWindow);
+  if (success) registeredShortcut = accelerator;
+  return success;
+}
+
 function toggleWindow() {
   if (windowVisible && mainWindow) {
     mainWindow.hide();
@@ -173,9 +187,9 @@ app.on('ready', () => {
     ? path.join(process.resourcesPath, 'icon.png')
     : path.join(__dirname, 'resources', 'icon.png');
   const trayIcon = nativeImage.createFromPath(iconPath).resize({ width: 16, height: 16 });
-  trayIcon.setTemplateImage(true);
+
   tray = new Tray(trayIcon);
-  tray.setToolTip('FloatNote');
+  tray.setToolTip('FloatNotes');
   tray.on('click', () => toggleWindow());
   tray.on('right-click', () => {
     const contextMenu = Menu.buildFromTemplate([
@@ -217,11 +231,8 @@ app.on('ready', () => {
     autoUpdater.checkForUpdatesAndNotify();
   });
 
-  // Register global hotkey: Option+Command+N
-  const ret = globalShortcut.register('Option+Cmd+n', () => {
-    toggleWindow();
-  });
-
+  // Register global hotkey (customizable)
+  const ret = registerGlobalShortcut(appSettings.globalShortcut || 'Option+Cmd+N');
   if (!ret) {
     console.log('Failed to register global hotkey');
   }
@@ -402,6 +413,14 @@ ipcMain.on('save-settings', (event, partial) => {
   }
   if ('theme' in partial) {
     nativeTheme.themeSource = appSettings.theme === 'system' ? 'system' : appSettings.theme;
+  }
+  if ('globalShortcut' in partial) {
+    const success = registerGlobalShortcut(appSettings.globalShortcut);
+    if (!success) {
+      // Roll back to the previously registered shortcut
+      appSettings.globalShortcut = registeredShortcut || 'Option+Cmd+N';
+      saveSettings(appSettings);
+    }
   }
 
   event.reply('settings-data', appSettings);

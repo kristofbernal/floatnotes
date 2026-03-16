@@ -11,3 +11,6 @@ dist/
 
 # Local Claude Code settings
 .claude/settings.local.json
+
+# Icon source exports
+FloatNotes Icon Exports/

@@ -1,13 +1,13 @@
 {
-  "name": "floatnote",
-  "version": "1.0.1",
+  "name": "floatnotes",
+  "version": "1.1.0",
   "description": "Always-on-top floating notes app for macOS",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
     "dev": "electron .",
     "build": "electron-builder build --mac",
-    "launch": "npm run build && open dist/mac-arm64/FloatNote.app",
+    "launch": "npm run build && open dist/mac-arm64/FloatNotes.app",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -16,7 +16,7 @@
   "type": "commonjs",
   "build": {
     "appId": "com.floatnote.app",
-    "productName": "FloatNote",
+    "productName": "FloatNotes",
     "directories": {
       "buildResources": "resources",
       "output": "dist"
@@ -27,11 +27,14 @@
       "repo": "floatnotes"
     },
     "extraResources": [
-      { "from": "resources/icon.png", "to": "icon.png" }
+      { "from": "resources/icon.png",              "to": "icon.png" },
+      { "from": "resources/icon-dark.icns",        "to": "icon-dark.icns" },
+      { "from": "resources/icon-clear-light.icns", "to": "icon-clear-light.icns" },
+      { "from": "resources/icon-clear-dark.icns",  "to": "icon-clear-dark.icns" }
     ],
     "mac": {
       "category": "public.app-category.productivity",
-      "icon": "resources/icon.png",
+      "icon": "resources/icon.icns",
       "identity": null,
       "target": [
         {
