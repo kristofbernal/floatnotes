@@ -467,7 +467,7 @@ button svg { display: block; flex-shrink: 0; }
   bottom: 38px;
   left: 8px;
   width: 260px;
-  max-height: min(340px, calc(100% - 86px));
+  max-height: min(420px, calc(100% - 86px));
   transform-origin: bottom left;
 }
 
@@ -748,6 +748,9 @@ kbd {
   display: flex;
   flex-direction: column;
   padding: 6px 0;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
 }
 
 .setting-row {
