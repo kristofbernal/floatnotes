@@ -91,6 +91,7 @@ function initialize() {
   });
 
   window.electronAPI.onSettingsLoaded((settings) => {
+    if (settings._version) currentSettings._version = settings._version;
     renderSettings(settings);
     applySettingsToDOM(settings);
     if (settings._iconPath) {
@@ -111,19 +112,13 @@ function initialize() {
   });
 
   window.electronAPI.onUpdateNotAvailable(() => {
-    showNotification('You\'re up to date!');
+    const v = currentSettings._version ? ` (v${currentSettings._version})` : '';
+    showNotification(`You're up to date${v}!`);
   });
 
-  window.electronAPI.onUpdateDownloaded((data) => {
-    if (data && data.manual) {
-      showNotification('Update found! Restarting…');
-      setTimeout(() => window.electronAPI.restartAndInstall(), 1500);
-    } else {
-      notification.textContent = 'Update ready — click to restart';
-      notification.classList.add('show');
-      notification.style.cursor = 'pointer';
-      notification.onclick = () => window.electronAPI.restartAndInstall();
-    }
+  window.electronAPI.onUpdateDownloaded(() => {
+    showNotification('Update ready — restarting…');
+    setTimeout(() => window.electronAPI.restartAndInstall(), 2000);
   });
 }
 

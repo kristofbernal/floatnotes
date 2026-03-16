@@ -263,7 +263,7 @@ app.on('ready', () => {
     const _iconPath = app.isPackaged
       ? path.join(process.resourcesPath, 'icon.png')
       : path.join(__dirname, 'resources', 'icon.png');
-    mainWindow.webContents.send('load-settings', { ...appSettings, _iconPath });
+    mainWindow.webContents.send('load-settings', { ...appSettings, _iconPath, _version: app.getVersion() });
   });
 });
 
