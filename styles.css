@@ -555,6 +555,17 @@ button svg { display: block; flex-shrink: 0; }
   background: var(--button-hover);
 }
 
+.update-btn.update-ready {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+.update-btn.update-ready:hover {
+  opacity: 0.85;
+  background: var(--accent);
+}
+
 .danger-btn {
   background: rgba(255, 59, 48, 0.1);
   border: 1px solid rgba(255, 59, 48, 0.3);

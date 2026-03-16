@@ -117,8 +117,11 @@ function initialize() {
   });
 
   window.electronAPI.onUpdateDownloaded(() => {
-    showNotification('Update ready — restarting…');
-    setTimeout(() => window.electronAPI.restartAndInstall(), 2000);
+    const btn = document.getElementById('checkUpdatesBtn');
+    if (btn) {
+      btn.textContent = 'Restart to update';
+      btn.classList.add('update-ready');
+    }
   });
 }
 
@@ -411,6 +414,11 @@ quitAppBtn.addEventListener('click', () => {
 });
 
 document.getElementById('checkUpdatesBtn').addEventListener('click', () => {
+  const btn = document.getElementById('checkUpdatesBtn');
+  if (btn.classList.contains('update-ready')) {
+    window.electronAPI.restartAndInstall();
+    return;
+  }
   window.electronAPI.checkForUpdates();
   showNotification('Checking for updates…');
 });
