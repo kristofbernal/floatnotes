@@ -65,7 +65,7 @@ Then open the app normally. You only need to do this once.
 - macOS 13 Ventura or later (Apple Silicon / arm64)
 - macOS 26 Tahoe or later recommended for the Liquid Glass effect
 
-> **Note:** Liquid Glass app icon variants are coming soon — still working on getting them just right.
+> **Note:** The app icon adapts to macOS appearance on Tahoe — Light, Dark, Clear, and Tinted variants are all supported.
 
 ## Building from Source
 
