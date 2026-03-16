@@ -218,8 +218,9 @@ app.on('ready', () => {
   // Auto-updater setup
   autoUpdater.checkForUpdatesAndNotify();
   autoUpdater.on('update-downloaded', () => {
-    if (mainWindow) mainWindow.webContents.send('update-downloaded', { manual: manualUpdateCheck });
+    if (mainWindow) mainWindow.webContents.send('update-downloaded');
     manualUpdateCheck = false;
+    setTimeout(() => autoUpdater.quitAndInstall(false, true), 2000);
   });
   autoUpdater.on('update-not-available', () => {
     if (mainWindow) mainWindow.webContents.send('update-not-available');
