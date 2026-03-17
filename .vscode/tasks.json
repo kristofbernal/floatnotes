@@ -1,0 +1,30 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build & Run FloatNotes",
+      "type": "shell",
+      "command": "pkill -f FloatNote || true && npm run build && open dist/mac-arm64/FloatNotes.app",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    }
+  ,
+    {
+      "label": "Kill FloatNotes",
+      "type": "shell",
+      "command": "pkill -f FloatNote || true",
+      "presentation": {
+        "reveal": "silent",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    }
+  ]
+}
