@@ -276,17 +276,44 @@ app.on('ready', () => {
 
   createWindow();
 
-  // Native macOS application menu (FloatNotes > Check for Updates)
+  // Native macOS application menu (FloatNotes > Check for Updates + standard menus)
   Menu.setApplicationMenu(Menu.buildFromTemplate([
     {
       label: 'FloatNotes',
       submenu: [
+        { label: 'About FloatNotes', role: 'about' },
+        { type: 'separator' },
         {
           label: 'Check for Updates…',
           click: () => checkAndUpdate(true)
         },
         { type: 'separator' },
+        { label: 'Hide FloatNotes', role: 'hide' },
+        { label: 'Hide Others', role: 'hideOthers' },
+        { label: 'Show All', role: 'unhide' },
+        { type: 'separator' },
         { label: 'Quit FloatNotes', accelerator: 'Cmd+Q', click: () => app.quit() }
+      ]
+    },
+    {
+      label: 'Edit',
+      submenu: [
+        { label: 'Undo', role: 'undo' },
+        { label: 'Redo', role: 'redo' },
+        { type: 'separator' },
+        { label: 'Cut', role: 'cut' },
+        { label: 'Copy', role: 'copy' },
+        { label: 'Paste', role: 'paste' },
+        { label: 'Select All', role: 'selectAll' }
+      ]
+    },
+    {
+      label: 'Window',
+      submenu: [
+        { label: 'Minimize', role: 'minimize' },
+        { label: 'Zoom', role: 'zoom' },
+        { type: 'separator' },
+        { label: 'Bring All to Front', role: 'front' }
       ]
     }
   ]));

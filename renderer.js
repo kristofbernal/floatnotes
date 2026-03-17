@@ -112,16 +112,18 @@ function initialize() {
   });
 
   window.electronAPI.onUpdateNotAvailable(() => {
-    const v = currentSettings._version ? ` (v${currentSettings._version})` : '';
-    showNotification(`You're up to date${v}!`);
+    const btn = document.getElementById('checkUpdatesBtn');
+      if (btn) {
+        btn.textContent = `You're up to date (v${currentSettings._version})!`;
+        btn.disabled = true;
+        setTimeout(() => {          btn.textContent = 'Check for updates';
+          btn.disabled = false;
+        }, 3000);
+      }
   });
 
   window.electronAPI.onUpdateDownloaded(() => {
-    const btn = document.getElementById('checkUpdatesBtn');
-    if (btn) {
-      btn.textContent = 'Restart to update';
-      btn.classList.add('update-ready');
-    }
+    window.electronAPI.restartAndInstall();
   });
 }
 
@@ -419,8 +421,10 @@ document.getElementById('checkUpdatesBtn').addEventListener('click', () => {
     window.electronAPI.restartAndInstall();
     return;
   }
-  window.electronAPI.checkForUpdates();
-  showNotification('Checking for updates…');
+  window.electronAPI.checkForUpdates();{
+    btn.textContent = 'Are you even reading this?';
+    btn.disabled = true;
+  }
 });
 
 settingsPanel.addEventListener('click', (e) => {

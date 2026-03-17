@@ -8,7 +8,11 @@
       "hidden" : false,
       "layers" : [
         {
+          "blend-mode" : "normal",
           "fill-specializations" : [
+            {
+              "value" : "none"
+            },
             {
               "appearance" : "tinted",
               "value" : "none"
@@ -18,6 +22,7 @@
           "hidden" : false,
           "image-name" : "Float.png",
           "name" : "Float",
+          "opacity" : 1,
           "position" : {
             "scale" : 0.7,
             "translation-in-points" : [
@@ -27,6 +32,12 @@
           }
         },
         {
+          "blend-mode-specializations" : [
+            {
+              "appearance" : "dark",
+              "value" : "hard-light"
+            }
+          ],
           "fill-specializations" : [
             {
               "value" : "none"
@@ -36,6 +47,7 @@
               "value" : "none"
             }
           ],
+          "hidden" : false,
           "image-name" : "Notepad.png",
           "name" : "Notepad",
           "opacity-specializations" : [
@@ -61,7 +73,7 @@
       "specular" : true,
       "translucency" : {
         "enabled" : true,
-        "value" : 0.46
+        "value" : 0.33
       }
     }
   ],
