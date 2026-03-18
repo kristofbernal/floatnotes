@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, globalShortcut, clipboard, Tray, nativeImage, Menu, nativeTheme, shell } = require('electron');
+const { app, BrowserWindow, ipcMain, globalShortcut, clipboard, Tray, nativeImage, Menu, nativeTheme, shell, systemPreferences } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const https = require('https');
@@ -385,7 +385,8 @@ app.on('ready', () => {
     const _iconPath = app.isPackaged
       ? path.join(process.resourcesPath, 'icon.png')
       : path.join(__dirname, 'resources', 'icon.png');
-    mainWindow.webContents.send('load-settings', { ...appSettings, _iconPath, _version: app.getVersion() });
+    const _accentColor = systemPreferences.getAccentColor(); // e.g. 'aabbccff' RGBA hex
+    mainWindow.webContents.send('load-settings', { ...appSettings, _iconPath, _version: app.getVersion(), _accentColor });
   });
 });
 
@@ -554,11 +555,25 @@ ipcMain.on('save-settings', (event, partial) => {
   event.reply('settings-data', appSettings);
 });
 
-ipcMain.on('resize-window-height', (event, height) => {
-  if (mainWindow) {
-    const [currentWidth] = mainWindow.getSize();
-    mainWindow.setSize(currentWidth, Math.round(height));
-  }
+ipcMain.on('resize-window-height', (event, targetHeight) => {
+  if (!mainWindow) return;
+  const [currentWidth, currentHeight] = mainWindow.getSize();
+  const target = Math.round(targetHeight);
+  const diff = target - currentHeight;
+  if (Math.abs(diff) < 2) return;
+
+  const steps = 12;
+  const duration = 150; // ms
+  let step = 0;
+  const interval = setInterval(() => {
+    step++;
+    // Ease-out curve for smooth deceleration
+    const t = step / steps;
+    const ease = 1 - Math.pow(1 - t, 3);
+    const h = Math.round(currentHeight + diff * ease);
+    mainWindow.setSize(currentWidth, h);
+    if (step >= steps) clearInterval(interval);
+  }, duration / steps);
 });
 
 ipcMain.on('quit-app', () => {

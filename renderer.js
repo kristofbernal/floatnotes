@@ -35,7 +35,7 @@ const allNotesBtn       = document.getElementById('allNotesBtn');
 const allNotesPanel     = document.getElementById('allNotesPanel');
 const allNotesCloseBtn  = document.getElementById('allNotesCloseBtn');
 const allNotesList      = document.getElementById('allNotesList');
-const deleteAllNotesBtn = document.getElementById('deleteAllNotesBtn');
+const contextMenu       = document.getElementById('contextMenu');
 
 // Settings panel
 const settingsBtn       = document.getElementById('settingsBtn');
@@ -97,6 +97,13 @@ function initialize() {
     if (settings._iconPath) {
       const icon = document.getElementById('onboardingAppIcon');
       if (icon) icon.src = 'file://' + settings._iconPath;
+    }
+    if (settings._accentColor) {
+      // Convert RGBA hex (e.g. 'aabbccff') to rgba() with reduced opacity for selection
+      const r = parseInt(settings._accentColor.slice(0, 2), 16);
+      const g = parseInt(settings._accentColor.slice(2, 4), 16);
+      const b = parseInt(settings._accentColor.slice(4, 6), 16);
+      document.documentElement.style.setProperty('--selection-color', `rgba(${r},${g},${b},0.35)`);
     }
     if (!settings.onboarded) showOnboarding();
   });
@@ -197,17 +204,29 @@ function updateTimestamps() {
 // Window sizing
 // ─────────────────────────────────────────────────────────
 function adjustWindowHeight(allowShrink = false) {
-  // Compute ideal window height = non-editor chrome + editor content
-  // container.offsetHeight fills 100vh; subtracting the flex editor-wrapper
-  // gives us the fixed chrome (header + toolbar + footer + gaps + padding).
-  const container    = document.querySelector('.container');
+  const container     = document.querySelector('.container');
   const editorWrapper = document.querySelector('.editor-wrapper');
-  const chromeH  = container.offsetHeight - editorWrapper.offsetHeight;
-  const idealH   = Math.max(200, Math.min(700, chromeH + editor.scrollHeight));
-  const currentH = window.outerHeight || 300;
+  const chromeH       = container.offsetHeight - editorWrapper.offsetHeight;
 
-  if (idealH > currentH || (allowShrink && idealH < currentH)) {
+  // Measure true content height: temporarily collapse the editor to 0px
+  // so scrollHeight reports the full content size, not the flex-stretched size.
+  editor.style.flex = 'none';
+  editor.style.height = '0px';
+  const contentH = editor.scrollHeight;
+  editor.style.height = '';
+  editor.style.flex = '';
+
+  const idealH = Math.max(200, Math.min(700, chromeH + contentH));
+
+  if (allowShrink) {
+    // Always resize when switching notes
     window.electronAPI.resizeWindowHeight(Math.round(idealH));
+  } else {
+    // Only grow while typing (don't shrink on every keystroke)
+    const currentH = window.innerHeight || 300;
+    if (idealH > currentH) {
+      window.electronAPI.resizeWindowHeight(Math.round(idealH));
+    }
   }
 }
 
@@ -310,12 +329,6 @@ allNotesBtn.addEventListener('click', () => {
 });
 allNotesCloseBtn.addEventListener('click', () => {
   allNotesPanel.style.display = 'none';
-});
-deleteAllNotesBtn.addEventListener('click', () => {
-  if (confirm('Delete ALL notes? This cannot be undone.')) {
-    window.electronAPI.deleteAllNotes();
-    allNotesPanel.style.display = 'none';
-  }
 });
 
 // ─────────────────────────────────────────────────────────
@@ -499,6 +512,18 @@ function getCurrentBlock() {
   return (node && node !== editor) ? node : null;
 }
 
+// Returns all editor blocks intersected by the current selection (multi-line only)
+function getSelectedBlocks() {
+  const sel = window.getSelection();
+  if (!sel || sel.rangeCount === 0) return [];
+  const range = sel.getRangeAt(0);
+  const blocks = [];
+  for (const child of editor.children) {
+    if (range.intersectsNode(child)) blocks.push(child);
+  }
+  return blocks.length > 1 ? blocks : [];
+}
+
 function getFirstTextNode(element) {
   const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
   return walker.nextNode();
@@ -539,10 +564,77 @@ editor.addEventListener('click', (e) => {
   autoSave();
 });
 
+// ─────────────────────────────────────────────────────────
+// Right-click context menu
+// ─────────────────────────────────────────────────────────
+let ctxHideTimeout;
+
+let savedContextSelection = null;
+
+editor.addEventListener('contextmenu', (e) => {
+  e.preventDefault();
+  const sel = window.getSelection();
+  if (!sel || sel.isCollapsed) return; // only show when text is selected
+  // Save selection so it can be restored when the menu button is clicked
+  savedContextSelection = sel.rangeCount > 0 ? sel.getRangeAt(0).cloneRange() : null;
+  contextMenu.style.display = 'flex';
+  contextMenu.style.left = e.clientX + 'px';
+  contextMenu.style.top = (e.clientY - 44) + 'px'; // show above cursor
+  // Clamp to window bounds after render
+  requestAnimationFrame(() => {
+    const rect = contextMenu.getBoundingClientRect();
+    if (rect.right > window.innerWidth - 8)  contextMenu.style.left = (window.innerWidth - rect.width - 8) + 'px';
+    if (rect.top < 8)                         contextMenu.style.top  = (e.clientY + 8) + 'px';
+  });
+});
+
+contextMenu.addEventListener('mousedown', (e) => e.preventDefault()); // keep text selection
+contextMenu.addEventListener('click', (e) => {
+  const btn = e.target.closest('.ctx-btn');
+  if (!btn) return;
+  const action = btn.dataset.action;
+  contextMenu.style.display = 'none';
+  // Restore the selection that was active when the menu was opened
+  if (savedContextSelection) {
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(savedContextSelection);
+  }
+  if (action === 'link') openLinkDialog();
+  else formatText(action);
+});
+
+// Safety triangle: delay hide on mouseleave so diagonal movement doesn't dismiss
+contextMenu.addEventListener('mouseleave', () => {
+  ctxHideTimeout = setTimeout(() => { contextMenu.style.display = 'none'; }, 200);
+});
+contextMenu.addEventListener('mouseenter', () => clearTimeout(ctxHideTimeout));
+
+document.addEventListener('mousedown', (e) => {
+  if (!contextMenu.contains(e.target)) contextMenu.style.display = 'none';
+});
+
 bulletBtn.addEventListener('mousedown', (e) => {
   e.preventDefault(); // keep focus/caret in editor
 });
 bulletBtn.addEventListener('click', () => {
+  const selectedBlocks = getSelectedBlocks();
+  if (selectedBlocks.length > 0) {
+    for (const block of selectedBlocks) {
+      if (blockHasTodoCb(block)) {
+        const todoCb = block.firstChild;
+        const afterSpan = todoCb.nextSibling;
+        todoCb.remove();
+        if (afterSpan && afterSpan.nodeType === Node.TEXT_NODE) {
+          afterSpan.textContent = '• ' + afterSpan.textContent.trimStart();
+        } else {
+          block.insertBefore(document.createTextNode('• '), block.firstChild);
+        }
+      }
+    }
+    autoSave();
+    return;
+  }
   const block = getCurrentBlock();
   if (block) {
     if (blockHasTodoCb(block)) {
@@ -586,6 +678,25 @@ todoBtn.addEventListener('mousedown', (e) => {
   e.preventDefault(); // keep focus/caret in editor
 });
 todoBtn.addEventListener('click', () => {
+  const selectedBlocks = getSelectedBlocks();
+  if (selectedBlocks.length > 0) {
+    for (const block of selectedBlocks) {
+      if (blockHasTodoCb(block)) continue; // already todo
+      const text = block.innerText || block.textContent || '';
+      if (text.startsWith('• ')) {
+        const node = getFirstTextNode(block);
+        if (node && node.textContent.startsWith('• ')) {
+          node.textContent = node.textContent.slice(2);
+          const span = createTodoSpan();
+          const space = document.createTextNode(' ');
+          block.insertBefore(space, node);
+          block.insertBefore(span, space);
+        }
+      }
+    }
+    autoSave();
+    return;
+  }
   const block = getCurrentBlock();
   if (block) {
     if (blockHasTodoCb(block)) { autoSave(); return; } // already todo
@@ -855,14 +966,6 @@ editor.addEventListener('keydown', (e) => {
     e.preventDefault();
     if (notes.length === 1) { showNotification('Cannot delete the last note', true); return; }
     if (confirm('Delete this note?')) window.electronAPI.deleteNote(currentNote.id);
-  }
-
-  // Cmd+Shift+Delete → delete ALL notes (double confirm)
-  if (e.metaKey && e.shiftKey && e.key === 'Backspace') {
-    e.preventDefault();
-    if (!confirm('Delete ALL notes? This cannot be undone.')) return;
-    if (!confirm('Are you absolutely sure? Every note will be permanently deleted.')) return;
-    window.electronAPI.deleteAllNotes();
   }
 
   // Cmd+Enter → copy to clipboard

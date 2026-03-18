@@ -348,6 +348,13 @@ button svg { display: block; flex-shrink: 0; }
   pointer-events: none;
 }
 
+/* Force selection highlight visible even when editor loses focus (e.g. right-click).
+   --selection-color is set from systemPreferences.getAccentColor() in main.js. */
+.editor::selection,
+.editor *::selection {
+  background: var(--selection-color, rgba(0, 120, 215, 0.35));
+}
+
 /* ── Metadata ──────────────────────────────────────────── */
 .metadata {
   padding: 2px 6px;
@@ -712,6 +719,63 @@ kbd {
   font-size: 10px;
   font-family: 'SF Mono', Monaco, monospace;
   -webkit-app-region: no-drag;
+}
+
+/* ── Right-click context menu ───────────────────────────── */
+.context-menu {
+  position: fixed;
+  z-index: 9999;
+  border-radius: 12px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  -webkit-app-region: no-drag;
+}
+
+.ctx-btn {
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  padding: 5px 10px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 28px;
+  transition: background 0.12s;
+}
+
+.ctx-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+.ctx-btn:hover {
+  background: var(--button-hover);
+}
+
+.ctx-separator {
+  width: 1px;
+  height: 18px;
+  background: var(--border-color);
+  margin: 0 2px;
+  flex-shrink: 0;
+}
+
+@media (prefers-color-scheme: dark) {
+  .context-menu {
+    background: rgba(40, 40, 40, 0.88);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
 }
 
 @media (prefers-color-scheme: dark) {

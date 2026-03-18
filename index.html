@@ -76,9 +76,6 @@
       <div id="allNotesList" class="shortcuts-list">
         <!-- dynamically populated -->
       </div>
-      <div class="all-notes-footer">
-        <button id="deleteAllNotesBtn" class="danger-btn">Delete All Notes</button>
-      </div>
     </div>
 
     <!-- Settings panel -->
@@ -140,18 +137,17 @@
         <button id="shortcutsCloseBtn" class="shortcuts-close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       </div>
       <div class="shortcuts-list">
-        <div class="shortcut-row"><kbd>⌘B</kbd><span>Bold</span></div>
-        <div class="shortcut-row"><kbd>⌘I</kbd><span>Italic</span></div>
-        <div class="shortcut-row"><kbd>⌘U</kbd><span>Underline</span></div>
-        <div class="shortcut-row"><kbd>⌘N</kbd><span>New note</span></div>
-        <div class="shortcut-row"><kbd>⌘⌫</kbd><span>Delete note</span></div>
-        <div class="shortcut-row"><kbd>⌘⇧⌫</kbd><span>Delete all notes</span></div>
-        <div class="shortcut-row"><kbd>⌘⏎</kbd><span>Copy to clipboard</span></div>
-        <div class="shortcut-row"><kbd>⌘←</kbd><span>Previous note</span></div>
-        <div class="shortcut-row"><kbd>⌘→</kbd><span>Next note</span></div>
+        <div class="shortcut-row"><kbd>⌘ B</kbd><span>Bold</span></div>
+        <div class="shortcut-row"><kbd>⌘ I</kbd><span>Italic</span></div>
+        <div class="shortcut-row"><kbd>⌘ U</kbd><span>Underline</span></div>
+        <div class="shortcut-row"><kbd>⌘ N</kbd><span>New note</span></div>
+        <div class="shortcut-row"><kbd>⌘ ⌫</kbd><span>Delete note</span></div>
+        <div class="shortcut-row"><kbd>⌘ ⏎</kbd><span>Copy to clipboard</span></div>
+        <div class="shortcut-row"><kbd>⌘ ←</kbd><span>Previous note</span></div>
+        <div class="shortcut-row"><kbd>⌘ →</kbd><span>Next note</span></div>
         <div class="shortcut-row"><kbd>-</kbd> + <kbd>Space</kbd><span>Bullet point</span></div>
-        <div class="shortcut-row"><kbd>[]</kbd> + <kbd>Space</kbd><span>To-do item</span></div>
-        <div class="shortcut-row"><kbd id="toggleShortcutKbd">⌥⌘N</kbd><span>Toggle window</span></div>
+        <div class="shortcut-row"><kbd>[ ]</kbd> + <kbd>Space</kbd><span>To-do item</span></div>
+        <div class="shortcut-row"><kbd id="toggleShortcutKbd">⌥ ⌘ N</kbd><span>Toggle window</span></div>
       </div>
     </div>
 
@@ -176,6 +172,15 @@
         </div>
         <button class="onboarding-cta" id="onboardingDismissBtn">Get Started</button>
       </div>
+    </div>
+
+    <!-- Right-click formatting context menu -->
+    <div id="contextMenu" class="context-menu" style="display:none;">
+      <button class="ctx-btn" data-action="bold"><strong>B</strong></button>
+      <button class="ctx-btn" data-action="italic"><em>I</em></button>
+      <button class="ctx-btn" data-action="underline"><u>U</u></button>
+      <div class="ctx-separator"></div>
+      <button class="ctx-btn" data-action="link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></button>
     </div>
 
     <div id="notification"></div>
