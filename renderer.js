@@ -142,10 +142,11 @@ function loadNote(note) {
   currentNote = note;
   // Migrate legacy ☐/☑ text to interactive spans, then set content
   editor.innerHTML = migrateTodoText(note.content || '');
+  stripBulletFormatting();
   noteTitle.value  = note.title;
   updateTimestamps();
   // Allow shrinking when switching notes; setTimeout lets layout fully settle
-  setTimeout(() => adjustWindowHeight(true), 80);
+  setTimeout(() => adjustWindowHeight(true), 150);
   // Auto-focus title when a new note is created
   if (focusTitleOnNextLoad) {
     focusTitleOnNextLoad = false;
@@ -320,9 +321,26 @@ deleteAllNotesBtn.addEventListener('click', () => {
 // ─────────────────────────────────────────────────────────
 // Formatting — execCommand (works with contenteditable)
 // ─────────────────────────────────────────────────────────
+// Ensure '• ' prefix is never wrapped in bold/italic/underline across all blocks
+function stripBulletFormatting() {
+  editor.childNodes.forEach(block => {
+    if (block.nodeType !== Node.ELEMENT_NODE) return;
+    const first = block.firstChild;
+    if (!first || first.nodeType !== Node.ELEMENT_NODE) return;
+    const text = first.textContent || '';
+    if (text.startsWith('• ')) {
+      const bulletText = document.createTextNode('• ');
+      first.textContent = text.slice(2);
+      block.insertBefore(bulletText, first);
+      if (first.textContent === '') first.remove();
+    }
+  });
+}
+
 function formatText(command) {
   editor.focus();
   document.execCommand(command, false, null);
+  stripBulletFormatting();
   autoSave();
 }
 
@@ -541,6 +559,23 @@ bulletBtn.addEventListener('click', () => {
     }
     const text = block.innerText || block.textContent || '';
     if (text.startsWith('• ')) { autoSave(); return; } // already bullet
+    // Insert '• ' as a plain DOM text node at the start of the block so it
+    // never inherits surrounding bold/italic formatting (execCommand would).
+    const bulletNode = document.createTextNode('• ');
+    block.insertBefore(bulletNode, block.firstChild);
+    //Unwrap bullet node from any bold/italic parent
+    if (bulletNode.parentElement && bulletNode.parentElement !== block) {
+      const wrapper = bulletNode.parentElement;
+        wrapper.parentNode.insertBefore(bulletNode, wrapper);
+    } 
+    const range = document.createRange();
+    range.setStart(bulletNode, 2);
+    range.collapse(true);
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+    autoSave();
+    return;
   }
   editor.focus();
   document.execCommand('insertText', false, '• ');
@@ -634,8 +669,34 @@ noteTitle.addEventListener('keydown', (e) => {
 // Editor input
 // ─────────────────────────────────────────────────────────
 editor.addEventListener('input', () => {
+  stripBulletFormatting();
   autoSave();
   adjustWindowHeight();
+});
+
+// ─────────────────────────────────────────────────────────
+// Paste — strip duplicate bullet/todo prefix
+// ─────────────────────────────────────────────────────────
+editor.addEventListener('paste', (e) => {
+  const block = getCurrentBlock();
+  if (!block) return;
+
+  const blockText = block.innerText || block.textContent || '';
+  const hasBullet = blockText.startsWith('• ');
+  const hasTodo   = blockHasTodoCb(block);
+  if (!hasBullet && !hasTodo) return;
+
+  // Always use plain text when pasting onto a bullet/todo line to prevent
+  // HTML paste from inserting duplicate bullet chars or todo-check spans.
+  e.preventDefault();
+  const pastedText = (e.clipboardData || window.clipboardData).getData('text/plain');
+  if (!pastedText) return;
+
+  const lines = pastedText.split('\n');
+  // Strip any bullet or todo prefix from the first pasted line to avoid duplication
+  lines[0] = lines[0].replace(/^[•] /, '').replace(/^[☐☑] /, '').trimStart();
+  document.execCommand('insertText', false, lines.join('\n'));
+  autoSave();
 });
 
 // ─────────────────────────────────────────────────────────
@@ -656,6 +717,10 @@ editor.addEventListener('keydown', (e) => {
 
     // "- " → bullet • (direct text-node edit avoids Chromium new-line bug)
     if (textBefore.endsWith('-')) {
+      const block = getCurrentBlock();
+      if (block && (block.innerText || block.textContent || '').startsWith('•')) {
+        return;
+      }
       e.preventDefault();
       const beforeDash = node.textContent.substring(0, range.startOffset - 1);
       const afterDash  = node.textContent.substring(range.startOffset);
@@ -694,6 +759,26 @@ editor.addEventListener('keydown', (e) => {
       sel.addRange(newRange);
       autoSave();
       return;
+    }
+  }
+
+  // ── Backspace on empty todo → clear the span immediately ─
+  if (e.key === 'Backspace') {
+    const block = getCurrentBlock();
+    if (block && blockHasTodoCb(block)) {
+      const text = (block.innerText || block.textContent || '').replace(/\u00a0/g, '').trim();
+      if (text === '' || text === ' ') {
+        e.preventDefault();
+        block.innerHTML = '<br>';
+        const r = document.createRange();
+        r.setStart(block, 0);
+        r.collapse(true);
+        const s = window.getSelection();
+        s.removeAllRanges();
+        s.addRange(r);
+        autoSave();
+        return;
+      }
     }
   }
 
@@ -752,14 +837,6 @@ editor.addEventListener('keydown', (e) => {
   }
 
   // ── Navigation ────────────────────────────────────────
-  if (e.metaKey && !e.shiftKey && e.key === 'ArrowLeft') {
-    e.preventDefault();
-    window.electronAPI.navigateNote('prev');
-  }
-  if (e.metaKey && !e.shiftKey && e.key === 'ArrowRight') {
-    e.preventDefault();
-    window.electronAPI.navigateNote('next');
-  }
 
   // ── Formatting ────────────────────────────────────────
   if (e.metaKey && !e.shiftKey && e.key === 'b') { e.preventDefault(); formatText('bold'); }
@@ -919,6 +996,17 @@ onboardingRecordBtn.addEventListener('click', () => {
 settingsRecordBtn.addEventListener('click', () => {
   if (isRecording && activeRecorder === 'settings') stopRecording(false);
   else startRecording('settings');
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.metaKey && !e.shiftKey && e.key === 'ArrowLeft') {
+    e.preventDefault();
+    window.electronAPI.navigateNote('prev');
+  }
+  if (e.metaKey && !e.shiftKey && e.key === 'ArrowRight') {
+    e.preventDefault();
+    window.electronAPI.navigateNote('next');
+  }
 });
 
 // ─────────────────────────────────────────────────────────

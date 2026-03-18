@@ -18,7 +18,7 @@ input, button, textarea, select {
   --bg-primary: rgba(255, 255, 255, 0);
   --bg-secondary: rgba(255, 255, 255, 0.08);
   /* Frosted glass panel */
-  --panel-bg: rgba(242, 242, 242, 0.99);
+  --panel-bg: rgba(242, 242, 242, 0.98);
   --text-primary: #000;
   --text-secondary: #555;
   --border-color: rgba(0, 0, 0, 0.12);
@@ -33,7 +33,7 @@ input, button, textarea, select {
     --bg-primary: rgba(0, 0, 0, 0);
     --bg-secondary: rgba(255, 255, 255, 0.04);
     /* Frosted glass panel */
-    --panel-bg: rgba(38, 38, 38, 0.99);
+    --panel-bg: rgba(38, 38, 38, 0.98);
     --text-primary: #fff;
     --text-secondary: #bbb;
     --border-color: rgba(255, 255, 255, 0.12);
@@ -92,7 +92,7 @@ body {
   width: 100%;
   padding: 8px;
   padding-top: 32px;   /* room for traffic lights */
-  padding-right: 12px; /* prevent delete btn clipping at min width */
+  padding-right: 8px; /* prevent delete btn clipping at min width */
   gap: 6px;
   position: relative;
   border-radius: 18px;
@@ -429,6 +429,9 @@ button svg { display: block; flex-shrink: 0; }
 /* Push Transfer + Copy to the right of the hamburger */
 #transferBtn {
   margin-left: auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* ── Shortcuts / All-Notes pop-out panels ──────────────── */
@@ -443,8 +446,8 @@ button svg { display: block; flex-shrink: 0; }
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
   border: 1px solid var(--border-color);
-  border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.18), 0 0 0 0.5px rgba(0,0,0,0.06);
+  border-radius: 14px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.28), 0 0 0 0.5px rgba(0,0,0,0.08);
   display: flex;
   flex-direction: column;
   z-index: 200;
@@ -545,7 +548,7 @@ button svg { display: block; flex-shrink: 0; }
   color: var(--text-primary);
   width: 100%;
   padding: 5px 10px;
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 11px;
   cursor: pointer;
   margin-bottom: 5px;
@@ -572,7 +575,7 @@ button svg { display: block; flex-shrink: 0; }
   color: #FF3B30;
   width: 100%;
   padding: 5px 10px;
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 11px;
   cursor: pointer;
 }
