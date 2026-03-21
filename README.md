@@ -1,5 +1,7 @@
 # FloatNotes
 
+> **⚠️ Notice:** FloatNotes is currently being migrated to a native Swift app and this Electron version will be sunset soon. The new app is faster, lighter, and feels right at home on macOS. Stay tuned.
+
 A lightweight, always-on-top floating note-taking app for macOS. Lives in your menu bar and stays above every window so you never lose your notes.
 
 ## Download
