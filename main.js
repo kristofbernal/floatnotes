@@ -8,9 +8,11 @@ const os = require('os');
 
 // Native Liquid Glass — NSGlassEffectView (macOS 26 Tahoe+)
 let liquidGlass = null;
+let supportsLiquidGlass = false;
 try {
   liquidGlass = require('electron-liquid-glass'); // CJS export is the instance directly
-  console.log('electron-liquid-glass loaded, glass supported:', liquidGlass.isGlassSupported());
+  supportsLiquidGlass = liquidGlass.isGlassSupported();
+  console.log('electron-liquid-glass loaded, glass supported:', supportsLiquidGlass);
 } catch (e) {
   console.log('electron-liquid-glass not available, falling back to vibrancy:', e.message);
 }
@@ -175,10 +177,10 @@ function createWindow() {
       backgroundThrottling: false   // prevent compositor from throttling when not focused
     },
     transparent: true,
-    vibrancy: liquidGlass ? undefined : 'under-window',
+    vibrancy: supportsLiquidGlass ? undefined : 'under-window',
     // 'active' forces NSVisualEffectView to always sample live backdrop
     // (followsWindowActiveState freezes when another app takes focus)
-    visualEffectState: liquidGlass ? undefined : 'active',
+    visualEffectState: supportsLiquidGlass ? undefined : 'active',
     frame: false,
     show: false
   });
@@ -193,7 +195,7 @@ function createWindow() {
     mainWindow.show();
     windowVisible = true;
     // Apply native Liquid Glass (NSGlassEffectView) if available
-    if (liquidGlass && liquidGlass.isGlassSupported()) {
+    if (liquidGlass && supportsLiquidGlass) {
       try {
         const glassId = liquidGlass.addView(mainWindow.getNativeWindowHandle(), {
           cornerRadius: 20
@@ -215,7 +217,7 @@ function createWindow() {
 
   // Vibrancy fallback: toggling setVibrancy forces macOS to re-establish
   // live CABackdropLayer sampling (prevents the "frozen" backdrop bug)
-  if (!liquidGlass) {
+  if (!supportsLiquidGlass) {
     mainWindow.on('blur', () => {
       setTimeout(() => {
         if (mainWindow) {
